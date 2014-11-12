@@ -1,0 +1,9 @@
+# Files to ignore globally
+.DS_Store
+.sass-cache
+
+# Temporary files & directories
+
+code/wp-content/plugins/json-data/cache
+
+*.orig
