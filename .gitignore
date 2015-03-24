@@ -7,3 +7,9 @@
 code/wp-content/plugins/json-data/cache
 
 *.orig
+
+# Emacs stuff
+
+*~
+\#*\#
+.\#*
