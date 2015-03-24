@@ -20,9 +20,21 @@ namespace DataFeed\Cache;
 /**
  * Store interface for data feed handles.
  */
-interface FeedItem
+interface FeedCache
 {
 
-	function getCurrentItem($feedName, $url, $interval, $format);
+	/**
+	 * Get the currently cached item.  If no item newer than the given
+	 * fetch interval is available, a new item will be fetched.
+	 *
+	 * @param string $feedName The name of the feed.
+	 * @param string $url The url of the feed.
+	 * @param int $interval The fetch interval.
+	 *
+	 * @return Associative array with the decoded data item.
+	 *
+	 * @throws FeedCacheException if no item could be fetched.
+	 */
+	function getCurrentItem($feedName, $url, $interval);
 
 }
