@@ -102,14 +102,22 @@ class FeedHandle
 	}
 
 	/**
-	 * @return string The active URL of this feed.
+	 * @return string The URL in effect of this feed.
 	 */
-	public function getURL()
+	public function getEffectiveURL()
 	{
 		if (isset($this->o_url) ) {
 			return $this->o_url;
 		}
 
+		return $this->url;
+	}
+
+	/**
+	 * @return string The URL of this feed.
+	 */
+	public function getURL()
+	{
 		return $this->url;
 	}
 
@@ -131,14 +139,22 @@ class FeedHandle
 	}
 
 	/**
-	 * @return int The active fetch interval of this feed.
+	 * @return int The effective fetch interval of this feed.
 	 */
-	public function getInterval()
+	public function getEffectiveInterval()
 	{
 		if (isset($this->o_interval) ) {
 			return $this->o_interval;
 		}
 
+		return $this->interval;
+	}
+
+	/**
+	 * @return int The fetch interval of this feed.
+	 */
+	public function getInterval()
+	{
 		return $this->interval;
 	}
 
@@ -159,13 +175,28 @@ class FeedHandle
 	}
 
 	/**
+	 * @return DateTime the creation time of this feed handle.
+	 */
+	public function getCreated()
+	{
+		return $this->created;
+	}
+
+	/**
+	 * @param DateTime $created the creation time of the feed.
+	 */
+	public function setCreated( $created )
+	{
+		$this->created = $created;
+	}
+
+	/**
 	 * Store the feed handle in persistent storage.
 	 */
 	public function store()
 	{
 		$this->feed_store->store( $this );
 	}
-
 
 	/**
 	 * Obtain the current item.
@@ -174,6 +205,6 @@ class FeedHandle
 	 */
 	public function getCurrentItem()
 	{
-		return $feed_item_cache->getItem($this->getName(), $this->getURL(), $this->getInterval(), $this->getFormat());
+		return $feed_item_cache->getItem($this->getName(), $this->getEffectiveURL(), $this->getEffectiveInterval());
 	}
 }

@@ -38,13 +38,50 @@ interface FeedStore
 	 *         LOAD_RESULT_DIRTY       if the configuration of the passed feed doesn't match the existing feed in the store.
 	 *         LOAD_RESULT_NONEXISTING if the feed didn't exist in the store.
 	 */
-	function loadFeed( FeedHandle $feed );
+	function loadFeedHandle( FeedHandle $feed );
 
 	/**
 	 * Store a feed instance on persistent storage.
 	 *
 	 * @param DataFeed $feed The feed to store.
 	 */
-	function storeFeed( FeedHandle $feed );
+	function storeFeedHandle( FeedHandle $feed );
+
+
+	/**
+	 * Return an array of feeds.
+	 *
+	 * @param string $search a search string to match.  If {@code null}, match all feeds.
+	 * @param string $orderby the field to order the result by.  If {@code null}, the order is unspecified.
+	 * @param int $offset the offset to the start of the resulting array in the set of matches.
+	 * @param int $limit maximum number of feeds in the resulting array.
+	 *
+	 * @return an array of objects containing the following properties:
+	 *
+	 *    * int    $id       Storage specific identifier.
+	 *    * string $name     Feed name.
+	 *    * string $url      Feed URL.
+	 *    * int    $interval Fetch interval.
+	 */
+	function searchFeeds( $search, $orderby, $offset, $limit );
+
+	/*
+	 * Wordpress actions.
+	 */
+
+	/**
+	 * Plugin activation.
+	 */
+	function activate();
+
+	/**
+	 * Plugin deactivation.
+	 */
+	function deactivate();
+
+	/**
+	 * Plugin uninstall.
+	 */
+	function uninstall();
 
 }

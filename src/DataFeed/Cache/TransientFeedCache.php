@@ -21,6 +21,12 @@ class TransientFeedCache implements FeedCache
 {
 
 	/**
+	 * To prevent multiple requests triggering simultaneous fetching, we trigger a fetch before the cached item expires and mark the cached item that a fetch is in progress.
+	 */
+	const FETCH_RETRY_INTERVAL = 30;
+	const FETCH_RETRIES = 2;
+
+	/**
 	 * The next level cache.
 	 *
 	 * @var FeedCache nextLevel
@@ -29,7 +35,30 @@ class TransientFeedCache implements FeedCache
 
 	public function __construct( FeedCache $nextLevel )
 	{
-		$this->nextLevel = $nextLevel
+		$this->nextLevel = $nextLevel;
+	}
+
+	private function fetch( $transientName, $interval )
+	{
+		$value = $nextLevel->getCurrentItem();
+
+		if ($value === false) {
+			throw new FeedCacheException( "Upstream returned false on feed '$feedName'" );
+		}
+
+		\set_transient( $transientName,
+			array(
+				'item' => $value,
+				'timestamp' => time(),
+				'fetching' => 0,
+			), $interval + ((FETCH_RETRIES + 1) * FETCH_RETRY_INTERVAL) );
+
+		return $value;
+	}
+
+	private static function shouldRefetch( $transient, $interval )
+	{
+		return time() > $transient['timestamp'] + $interval + ( $transient['fetching'] * FETCH_RETRY_INTERVAL );
 	}
 
 	/**
@@ -38,20 +67,26 @@ class TransientFeedCache implements FeedCache
 	public function getCurrentItem($feedName, $url, $interval)
 	{
 		$transientName = $this->getTransientName( $feedName );
-		$value = \get_transient( $transientName );
-		if ( $value !== false ) {
-			return $value;
+		$transient = \get_transient( $transientName );
+		if ( $transient !== false ) {
+			if (self::shouldRefetch( $transient, $interval ) ) {
+				/*
+				 * We use this simple scheme based on the 'fetching'
+				 * counter to avoid fetching the same data several
+				 * times simultaneously.  There is a race condition
+				 * here, so the refetch could be performed several
+				 * times anyway, but this should rarely happen, and
+				 * the consequence is insignificant.  Proper
+				 * synchronization is currently difficult in PHP.
+				 */
+				$transient['fetching']++;
+				\set_transient( $transientName, $transient );
+				return $this->fetch( $transientName );
+			}
+			return $transient['item'];
 		}
 
-		$value = $nextLevel->getCurrentItem();
-
-		if ($value === false) {
-			throw new FeedCacheException( "Upstream returned false on feed '$feedName'" );
-		}
-
-		\set_transient( $transientName, $value, $interval );
-
-		return $value;
+		return $this->fetch( $transientName );
 
 	}
 
