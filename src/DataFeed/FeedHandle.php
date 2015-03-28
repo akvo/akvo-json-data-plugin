@@ -139,6 +139,14 @@ class FeedHandle
 	}
 
 	/**
+	 * @return string The override URL.
+	 */
+	public function getOURL()
+	{
+		return $this->o_url;
+	}
+
+	/**
 	 * @return int The effective fetch interval of this feed.
 	 */
 	public function getEffectiveInterval()
@@ -175,6 +183,14 @@ class FeedHandle
 	}
 
 	/**
+	 * @return int The override interval.
+	 */
+	public function getOInterval()
+	{
+		return $this->o_interval;
+	}
+
+	/**
 	 * @return DateTime the creation time of this feed handle.
 	 */
 	public function getCreated()
@@ -195,7 +211,7 @@ class FeedHandle
 	 */
 	public function store()
 	{
-		$this->feed_store->store( $this );
+		$this->feed_store->storeFeedHandle( $this );
 	}
 
 	/**

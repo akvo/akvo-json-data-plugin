@@ -75,8 +75,8 @@ class DatabaseFeedStore implements FeedStore
 	public function storeFeedHandle( FeedHandle $feed )
 	{
 		list( $n, $result ) = $this->getNamedRow( $feed->getName() );
-		if ( $n !== 1 ) {
-			$created = new DateTime( 'now' );
+		if ( $n == 0 ) {
+			$created = new \DateTime( 'now' );
 			$feed->setCreated( $created );
 			$this->wpdb->insert( $this->tableName(), array(
 					'name'      => $feed->getName(),
@@ -104,7 +104,7 @@ class DatabaseFeedStore implements FeedStore
 
 	private function getNamedRow( $name )
 	{
-		$sql = $this->wpdb->prepare( 'SELECT id, name, url, o_url, interval, o_interval, created FROM ' . $this->tableName . ' WHERE name = %s', $name );
+		$sql = $this->wpdb->prepare( 'SELECT id, name, url, o_url, interval, o_interval, created FROM ' . $this->tableName() . ' WHERE name = %s', $name );
 
 		$n = $this->wpdb->query( $sql );
 
@@ -126,7 +126,7 @@ class DatabaseFeedStore implements FeedStore
 	 *    * string $url      Feed URL.
 	 *    * int    $interval Fetch interval.
 	 */
-	public function searchFeeds( $search, $orderby, $offset, $limit )
+	public function searchFeeds( $search = null , $orderby = null , $offset = null, $limit = null )
 	{
 		$sql = 'SELECT id, name, url, interval FROM ' . $this->tableName();
 		$args = array();
