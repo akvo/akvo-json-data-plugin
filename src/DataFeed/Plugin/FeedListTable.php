@@ -14,7 +14,12 @@ namespace DataFeed\Plugin;
  */
 class FeedListTable extends WP_List_Table {
 
-	function __construct( $args = array() ) {
+	private $feedStore;
+
+	function __construct( FeedStore $feedStore, $args = array() ) {
+
+		$this->feedStore = $feedStore;
+
 		parent::__construct( array(
 			'plural' => 'datafeeds',
 			'singular' => 'datafeed',
@@ -30,7 +35,7 @@ class FeedListTable extends WP_List_Table {
 
 		wp_reset_vars( array( 'action', 'feed_id', 'orderby', 'order', 's' ) );
 
-		$this->items = array();
+		$this->items = $feedStore->searchFeeds();
 	}
 
 	function no_items() {

@@ -27,9 +27,9 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($feed->getURL(), $url);
 		$this->assertEquals($feed->getOURL(), null);
 		$this->assertEquals($feed->getEffectiveURL(), $url);
-		$this->assertEquals($feed->getInterval(), 24 * 60);
+		$this->assertEquals($feed->getInterval(), 24 * 60 * 60);
 		$this->assertEquals($feed->getOInterval(), null);
-		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60);
+		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60 * 60);
 
 		$oURL = 'https://example.com/feed2';
 		$oInterval = 1;
@@ -39,7 +39,7 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 
 		$this->assertEquals($feed->getURL(), $url);
 		$this->assertEquals($feed->getEffectiveURL(), $oURL);
-		$this->assertEquals($feed->getInterval(), 24 * 60);
+		$this->assertEquals($feed->getInterval(), 24 * 60 * 60);
 		$this->assertEquals($feed->getEffectiveInterval(), $oInterval);
 
 		$feed->setOURL( null );
@@ -49,9 +49,9 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($feed->getURL(), $url);
 		$this->assertEquals($feed->getOURL(), null);
 		$this->assertEquals($feed->getEffectiveURL(), $url);
-		$this->assertEquals($feed->getInterval(), 24 * 60);
+		$this->assertEquals($feed->getInterval(), 24 * 60 * 60);
 		$this->assertEquals($feed->getOInterval(), null);
-		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60);
+		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60 * 60);
 
 	}
 

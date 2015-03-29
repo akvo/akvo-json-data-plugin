@@ -80,11 +80,12 @@ class FeedHandle
 	 * Construct a data feed handle.
 	 *
 	 * @param FeedStore $feed_store The feed store.
+	 * @param FeedCache $feed_item_cache The cache to fetch items from.
 	 * @param string $name     The name of the feed.
 	 * @param string $url      The url of the feed.
 	 * @param int    $interval The fetch interval in seconds.
 	 */
-	public function __construct( FeedStore $feed_store, FeedCache $feed_item_cache, $name, $url = NULL, $interval = 1440 )
+	public function __construct( FeedStore $feed_store, FeedCache $feed_item_cache, $name, $url = NULL, $interval = 86400 )
 	{
 		$this->name = $name;
 		$this->url = $url;
@@ -214,6 +215,25 @@ class FeedHandle
 		$this->feed_store->storeFeedHandle( $this );
 	}
 
+
+	/**
+	 * Load the feed handle from persistent storage.
+	 *
+	 * @return LOAD_RESULT_CLEAN       if the configuration of the passed feed matches the existing feed in the store.
+	 *         LOAD_RESULT_DIRTY       if the configuration of the passed feed doesn't match the existing feed in the store.
+	 *         LOAD_RESULT_NONEXISTING if the feed didn't exist in the store.
+	 *
+	 * @throws NonexistingFeedException if the url is not set and the handle doesn't exist in the database.
+	 */
+	public function load()
+	{
+		$ret = $this->feed_store->loadFeedHandle( $this );
+		if ( $ret === FeedStore::LOAD_RESULT_NONEXISTING && $this->getURL() === null ) {
+			throw new NonexistingFeedException( $this );
+		}
+		return $ret;
+	}
+
 	/**
 	 * Obtain the current item.
 	 *
@@ -221,6 +241,6 @@ class FeedHandle
 	 */
 	public function getCurrentItem()
 	{
-		return $feed_item_cache->getItem($this->getName(), $this->getEffectiveURL(), $this->getEffectiveInterval());
+		return $this->feed_item_cache->getCurrentItem($this->getName(), $this->getEffectiveURL(), $this->getEffectiveInterval());
 	}
 }

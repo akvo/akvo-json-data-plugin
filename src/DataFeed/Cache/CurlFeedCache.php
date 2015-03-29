@@ -47,7 +47,8 @@ class CurlFeedCache implements FeedCache
 				$contentType = 'application/json';
 			}
 
-			$contentType = split( ';', $contentType )[0];
+			$parts = \explode( ';', $contentType );
+			$contentType = $parts[0];
 
 			switch ( $contentType ) {
 				case 'application/json':

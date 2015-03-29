@@ -22,3 +22,5 @@ foreach ( array( 'admin_menu', 'plugins_loaded' ) as $a ) {
 	add_action( $a, array( 'DataFeed\Plugin\PluginManagement', $a ) );
 }
 
+add_shortcode( 'data_feed', 'DataFeed\DataFeed::shortcode' );
+add_filter( 'no_texturize_shortcodes', function ( $s ) { array_push( $s, 'data_feed' ); return $s; } );

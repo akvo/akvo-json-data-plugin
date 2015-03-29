@@ -17,6 +17,8 @@
 
 namespace DataFeed\Cache;
 
+use DataFeed\Cache\FeedCache;
+
 class TransientFeedCache implements FeedCache
 {
 
@@ -38,9 +40,9 @@ class TransientFeedCache implements FeedCache
 		$this->nextLevel = $nextLevel;
 	}
 
-	private function fetch( $transientName, $interval )
+	private function fetch( $feedName, $url, $interval, $transientName)
 	{
-		$value = $nextLevel->getCurrentItem();
+		$value = $this->nextLevel->getCurrentItem( $feedName, $url, $interval );
 
 		if ($value === false) {
 			throw new FeedCacheException( "Upstream returned false on feed '$feedName'" );
@@ -51,20 +53,20 @@ class TransientFeedCache implements FeedCache
 				'item' => $value,
 				'timestamp' => time(),
 				'fetching' => 0,
-			), $interval + ((FETCH_RETRIES + 1) * FETCH_RETRY_INTERVAL) );
+			), $interval + ((self::FETCH_RETRIES + 1) * self::FETCH_RETRY_INTERVAL) );
 
 		return $value;
 	}
 
 	private static function shouldRefetch( $transient, $interval )
 	{
-		return time() > $transient['timestamp'] + $interval + ( $transient['fetching'] * FETCH_RETRY_INTERVAL );
+		return time() > $transient['timestamp'] + $interval + ( $transient['fetching'] * self::FETCH_RETRY_INTERVAL );
 	}
 
 	/**
 	 * @override FeedCache::getCurrentItem
 	 */
-	public function getCurrentItem($feedName, $url, $interval)
+	public function getCurrentItem( $feedName, $url, $interval )
 	{
 		$transientName = $this->getTransientName( $feedName );
 		$transient = \get_transient( $transientName );
@@ -81,12 +83,12 @@ class TransientFeedCache implements FeedCache
 				 */
 				$transient['fetching']++;
 				\set_transient( $transientName, $transient );
-				return $this->fetch( $transientName );
+				return $this->fetch( $feedName, $url, $interval, $transientName );
 			}
 			return $transient['item'];
 		}
 
-		return $this->fetch( $transientName );
+		return $this->fetch( $feedName, $url, $interval, $transientName );
 
 	}
 

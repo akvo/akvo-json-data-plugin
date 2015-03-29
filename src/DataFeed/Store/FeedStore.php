@@ -56,12 +56,7 @@ interface FeedStore
 	 * @param int $offset the offset to the start of the resulting array in the set of matches.
 	 * @param int $limit maximum number of feeds in the resulting array.
 	 *
-	 * @return an array of objects containing the following properties:
-	 *
-	 *    * int    $id       Storage specific identifier.
-	 *    * string $name     Feed name.
-	 *    * string $url      Feed URL.
-	 *    * int    $interval Fetch interval.
+	 * @return an array of FeedHandles.
 	 */
 	function searchFeeds( $search, $orderby, $offset, $limit );
 
