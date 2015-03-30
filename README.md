@@ -6,6 +6,12 @@ fetching items from a JSON formatted datafeed and caching them for a
 specified interval.  If Curl is used as backend, also XML formatted
 feeds are supported.
 
+Data items are cached for a duration of twice the configured refetch
+interval for the feed.  If the current item is older than the refetch
+interval a refetch is attempted.  On failure the old item is returned.
+The refetching frequency on failure is restricted to one attempt per
+30s, unless the url changes on the feed.
+
 
 Shortcode data_feed
 -------------------
@@ -14,7 +20,7 @@ The shortcode can be used to extract, convert to a string and escape a value fro
 
         [data_feed name="my-example-data-feed" url="http://example.com/json-feed" interval="360" query="fieldname->subfield"]
 
-The shortcode will be substituted with the value.
+The shortcode will be substituted with the selected value in the item, or an error message surrounded by tags `&lt;span class="data-feed-error"&gt;...&lt;span&gt;`.
 
 ### Parameters
 
@@ -26,8 +32,13 @@ The shortcode will be substituted with the value.
 Plugin architecture
 -------------------
 
+The plugin consists of three basic components:
 
+* **feed cache** A chain of caches, with a network backend for fetching and caching items.
+* **feed store** A persistant storage for *feed handles*.
+* **object query language** A language for fetching data from a feed item.
 
+Also there is an administrative interface for editing (overriding url and interval) and deleting feed handles.  (Not yet completed.)
 
 PHP functions \DataFeed\DataFeed::item and \DataFeed\DataFeed::handle.
 ---------------------------------------------------------------------

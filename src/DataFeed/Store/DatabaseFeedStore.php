@@ -1,7 +1,6 @@
 <?php
-
 /**
- * Storage interface for feed handles.
+ * Database storage for feeds.
  *
  * PHP version 5.3
  *
