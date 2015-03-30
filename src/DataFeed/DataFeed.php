@@ -43,7 +43,10 @@ class DataFeed
 					return new \DataFeed\Store\DatabaseFeedStore( $wpdb, $c[DataFeed::FEED_HANDLE_FACTORY] );
 				},
 				DataFeed::FEED_CACHE_BACKEND => function ( $c ) {
-					return new \DataFeed\Cache\CurlFeedCache();
+					if (function_exists('\curl_init')) {
+						return new \DataFeed\Cache\CurlFeedCache();
+					}
+					return new \DataFeed\Cache\FileGetContentsFeedCache();
 				},
 				DataFeed::FEED_CACHE => function ( $c ) {
 					return new \DataFeed\Cache\TransientFeedCache( $c[DataFeed::FEED_CACHE_BACKEND] );
