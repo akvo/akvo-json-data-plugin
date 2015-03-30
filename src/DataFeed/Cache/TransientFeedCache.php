@@ -48,19 +48,28 @@ class TransientFeedCache implements FeedCache
 			throw new FeedCacheException( "Upstream returned false on feed '$feedName'" );
 		}
 
+		$now = \time();
+
 		\set_transient( $transientName,
 			array(
 				'item' => $value,
-				'timestamp' => time(),
+				'timestamp' => $now,
 				'fetching' => 0,
+				'url' => $url,
 			), $interval + ((self::FETCH_RETRIES + 1) * self::FETCH_RETRY_INTERVAL) );
 
 		return $value;
 	}
 
-	private static function shouldRefetch( $transient, $interval )
+	private static function shouldRefetch( $transient, $interval, $url )
 	{
-		return time() > $transient['timestamp'] + $interval + ( $transient['fetching'] * self::FETCH_RETRY_INTERVAL );
+		$now = \time();
+
+		$item_expired = (isset($transient['item']) && $now > $transient['timestamp'] + $interval) || ! isset($transient['item']);
+
+		$failed_fetch_expired = ! isset($transient['last_attempt']) || $now > $transient['last_attempt'] + (self::FETCH_RETRY_INTERVAL * $transient['fetching']);
+
+		return $item_expired && $failed_fetch_expired || $transient['url'] != $url;
 	}
 
 	/**
@@ -71,7 +80,7 @@ class TransientFeedCache implements FeedCache
 		$transientName = $this->getTransientName( $feedName );
 		$transient = \get_transient( $transientName );
 		if ( $transient !== false ) {
-			if (self::shouldRefetch( $transient, $interval ) ) {
+			if (self::shouldRefetch( $transient, $interval, $url ) ) {
 				/*
 				 * We use this simple scheme based on the 'fetching'
 				 * counter to avoid fetching the same data several
@@ -81,11 +90,36 @@ class TransientFeedCache implements FeedCache
 				 * the consequence is insignificant.  Proper
 				 * synchronization is currently difficult in PHP.
 				 */
-				$transient['fetching']++;
+				if ($transient['url'] == $url) {
+					$transient['fetching']++;
+				} else {
+					/*
+					 * Different URL passed, reset retry timeout.
+					 */
+					$transielt['url'] = $url;
+					$transient['fetching'] = 1;
+					$transient['last_attempt'] = time();
+				}
 				\set_transient( $transientName, $transient );
 				return $this->fetch( $feedName, $url, $interval, $transientName );
 			}
+			if ( ! isset( $transient['item'] ) ) {
+				throw new FeedCacheException('Fetching of data feed item is in progress, but no current item is available.  Waiting for fetch retry interval (' .
+					self::FETCH_RETRY_INTERVAL . 's) to expire.');
+			}
 			return $transient['item'];
+		} else {
+			/*
+			 * Indicate that a fetch has been iniated, so it will not
+			 * be retried until FETCH_RETRY_INTERVAL have expired or
+			 * the url has changed, even if the fetch fails..
+			 */
+			\set_transient( $transientName,
+				array(
+					'last_attempt' => time(),
+					'fetching' => 1,
+					'url' => $url
+				) );
 		}
 
 		return $this->fetch( $feedName, $url, $interval, $transientName );

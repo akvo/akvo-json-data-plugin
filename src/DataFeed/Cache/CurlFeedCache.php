@@ -30,10 +30,10 @@ class CurlFeedCache implements FeedCache
 	 */
 	public function getCurrentItem($feedName, $url, $interval)
 	{
-		$ch = curl_init( $url );
+		$ch = \curl_init( $url );
 		try {
-			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-			curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type' => 'application/json; text/xml') );
+			\curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+			\curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type' => 'application/json; text/xml') );
 
 			$t = curl_exec( $ch );
 
@@ -69,7 +69,7 @@ class CurlFeedCache implements FeedCache
 					throw new FeedCacheException( "Unsupported content type in feed '$feedName': '$contentType'" );
 			}
 		} catch (\Exception $e) {
-			curl_close( $ch );
+			\curl_close( $ch );
 			throw $e;
 		}
 	}
