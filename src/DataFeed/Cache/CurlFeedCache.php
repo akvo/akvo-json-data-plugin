@@ -52,18 +52,18 @@ class CurlFeedCache implements FeedCache
 
 			switch ( $contentType ) {
 				case 'application/json':
-					$result = json_decode( $t, true );
+					$result = \json_decode( $t, true );
 					if ( $result === null ) {
 						throw new FeedCacheException( "Could not parse json i feed '$feedName'." );
 					}
 					return $result;
 
 				case 'text/xml':
-					$result = simplexml_load_string( $t );
+					$result = \simplexml_load_string( $t );
 					if ( $result === false ) {
 						throw new FeedCacheException( "Could not parse xml in feed '$feedName'." );
 					}
-					return $result;
+					return \json_decode( \json_encode( $result ) );
 
 				default:
 					throw new FeedCacheException( "Unsupported content type in feed '$feedName': '$contentType'" );
