@@ -45,16 +45,18 @@ class DatabaseFeedStore implements FeedStore
 	private function fillFeedHandle( $row, FeedHandle $feed )
 	{
 		$dirty = false;
-		if ( $feed->getURL() != $row->df_url ) {
-			$dirty = true;
+		if ( $feed->getURL() === null ) {
 			$feed->setURL( $row->df_url );
+		} else if ( $feed->getURL() != $row->df_url ) {
+			$dirty = true;
 		}
 		if ( $row->df_o_url !== null && $row->df_o_url !== '' ) {
 			$feed->setOURL( $row->df_o_url );
 		}
-		if ( $feed->getInterval() != $row->df_interval ) {
-			$dirty = true;
+		if ( $feed->getInterval() === null ) {
 			$feed->setInterval( $row->df_interval );
+		} else if ( $feed->getInterval() != $row->df_interval ) {
+			$dirty = true;
 		}
 		if ( $row->df_o_interval !== null ) {
 			$feed->setOInterval( $row->df_o_interval );
