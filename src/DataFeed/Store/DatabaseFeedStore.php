@@ -74,7 +74,7 @@ class DatabaseFeedStore implements FeedStore
 	public function loadFeedHandle( FeedHandle $feed )
 	{
 		$result = $this->getNamedRow( $feed->getName() );
-		if ( count($result) === 0 ) {
+		if ( is_array($result) && count($result) === 0 ) {
 			return self::LOAD_RESULT_NONEXISTING;
 		}
 
@@ -104,7 +104,7 @@ class DatabaseFeedStore implements FeedStore
 		$add( 'df_interval', $feed->getInterval(), '%d' );
 		$add( 'df_o_interval', $feed->getOInterval(), '%d' );
 
-		if ( count($result) === 0 ) {
+		if ( is_array($result) && count($result) === 0 ) {
 			$created = new \DateTime( 'now' );
 			$feed->setCreated( $created );
 
@@ -141,30 +141,39 @@ class DatabaseFeedStore implements FeedStore
 	 *
 	 * @return an array of FeedHandles.
 	 */
-	public function searchFeeds( $search = null , $orderby = null , $offset = null, $limit = null )
+	public function searchFeeds( $search = null , $orderby = null , $order = null, $offset = null, $limit = null )
 	{
-		$sql = 'SELECT df_name, df_url, df_interval FROM ' . $this->tableName();
+		$sql = 'SELECT * FROM ' . $this->tableName();
 		$args = array();
 
-		if ( $search !== null ) {
+		if ( ! empty($search) ) {
 			$sql .= " WHERE df_name LIKE %s OR df_url LIKE %s";
-			array_push( $args, '%' . \escape_like($search) . '%' );
+			array_push( $args, '%' . \like_escape($search) . '%' );
 		}
 
-		if ( $orderby !== null ) {
-			$sql .= " ORDER BY %s";
+		$sql .= " ORDER BY %s %s";
+		if ( ! empty($orderby) ) {
 			array_push( $args, "df_$orderby" );
+		} else {
+			array_push( $args, "df_name" );
 		}
 
-		if ( $limit !== null ) {
+		if ( ! empty($order) ) {
+			array_push( $args, $order === "ASC" ? "ASC" : "DESC" );
+		} else {
+			array_push( $args, "ASC" );
+		}
+
+		if ( ! empty($limit) ) {
 			$sql .= " LIMIT %d";
 			array_push( $args, $limit );
 
-			if ( $offset !== null ) {
+			if ( ! empty($offset) ) {
 				$sql .= " OFFSET %d";
 				array_push( $args, $offset );
 			}
 		}
+
 
 		$st = $this->wpdb->prepare( $sql, $args );
 
@@ -172,10 +181,12 @@ class DatabaseFeedStore implements FeedStore
 
 		$handles = array();
 
-		foreach ( $results as $row ) {
-			$feedHandle = $this->feedHandleFactory->create( $row->name );
-			$this->fillFeedHandle( $row, $feedHandle );
-			array_push( $handles, $feedHandle );
+		if (is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$feedHandle = $this->feedHandleFactory->create( $row->df_name, null, null );
+				$this->fillFeedHandle( $row, $feedHandle );
+				array_push( $handles, $feedHandle );
+			}
 		}
 
 		return $handles;

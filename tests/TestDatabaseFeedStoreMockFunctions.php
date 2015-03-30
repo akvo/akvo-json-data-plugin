@@ -1,8 +1,7 @@
 <?php
 
-function escape_like( $s )
+function like_escape( $s )
 {
-	return "escape_like((( $s )))";
+	return "like_escape((( $s )))";
 }
-
 

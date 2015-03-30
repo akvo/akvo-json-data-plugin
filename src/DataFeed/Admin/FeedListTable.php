@@ -7,12 +7,14 @@
  * @since 1.0
  */
 
-namespace DataFeed\Plugin;
+namespace DataFeed\Admin;
+
+use DataFeed\Store\FeedStore;
 
 /**
  * Table for presenting the feeds in the administration settings.
  */
-class FeedListTable extends WP_List_Table {
+class FeedListTable extends \WP_List_Table {
 
 	private $feedStore;
 
@@ -35,7 +37,10 @@ class FeedListTable extends WP_List_Table {
 
 		wp_reset_vars( array( 'action', 'feed_id', 'orderby', 'order', 's' ) );
 
-		$this->items = $feedStore->searchFeeds();
+		$limit = $this->get_items_per_page( 'data_feed_admin_items_per_page' );
+		$page = $this->get_pagenum();
+
+		$this->items = $this->feedStore->searchFeeds( $s, $orderby, ($page - 1) * $limit, $limit );
 	}
 
 	function no_items() {
@@ -72,52 +77,53 @@ class FeedListTable extends WP_List_Table {
 
 		foreach ( $this->items as $feed ) {
 			$feed = self::sanitize( $feed );
-			$feed->name = esc_attr( $feed->name );
 
-			$short_url = url_shorten( $feed->url );
+			$short_url = url_shorten( $feed->getUrl() );
 
 			$style = ( $alt++ % 2 ) ? '' : ' class="alternate"';
 
-			$edit_link = self::get_edit_feed_link( $link );
+			$edit_link = self::get_edit_feed_link( $feed->getName() );
 ?>
-		<tr id="link-<?php echo $feed->id; ?>" <?php echo $style; ?>>
+		<tr id="link-<?php echo $feed->getName(); ?>" <?php echo $style; ?>>
 <?php
 
-			list( $columns, $hidden ) = $this->get_column_info();
-
-			foreach ( $columns as $column_name => $column_display_name ) {
+			 foreach ( $this->get_columns() as $column_name => $column_display_name ) {
 				$class = "class='column-$column_name'";
 
 				$style = '';
-				if ( in_array( $column_name, $hidden ) )
-					$style = ' style="display:none;"';
 
 				$attributes = $class . $style;
 
 				switch ( $column_name ) {
 					case 'cb': ?>
 						<th scope="row" class="check-column">
-							<label class="screen-reader-text" for="cb-select-<?php echo $feed->id; ?>"><?php echo sprintf( __( 'Select %s' ), $feed->name ); ?></label>
-							<input type="checkbox" name="feedcheck[]" id="cb-select-<?php echo esc_attr( $feed->id ); ?>" value="<?php echo esc_attr( $feed->id ); ?>" />
+						<label class="screen-reader-text" for="cb-select-<?php echo $feed->getName(); ?>"><?php echo sprintf( __( 'Select %s' ), $feed->getName() ); ?></label>
+							<input type="checkbox" name="feedcheck[]" id="cb-select-<?php echo esc_attr( $feed->getName() ); ?>" value="<?php echo esc_attr( $feed->getName() ); ?>" />
 						</th>
 						<?php
 						break;
 
 					case 'name':
-						echo "<td $attributes><strong><a class='row-title' href='$edit_link' title='" . esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $feed->name ) ) . "'>$feed->name</a></strong><br />";
+						echo "<td $attributes><strong><a class='row-title' href='$edit_link' title='" . esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $feed->getName() ) ) . "'>{$feed->getName()}</a></strong><br />";
 
 						$actions = array();
 						$actions['edit'] = '<a href="' . $edit_link . '">' . __( 'Edit' ) . '</a>';
-						$actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url( "link.php?action=delete&amp;feed_id=$feed->id", 'delete-bookmark_' . $feed->id ) . "' onclick=\"if ( confirm( '" . esc_js( sprintf( __( "You are about to delete this feed '%s'\n  'Cancel' to stop, 'OK' to delete." ), $feed->name ) ) . "' ) ) { return true;}return false;\">" . __( 'Delete' ) . "</a>";
+						$actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url( "link.php?action=delete&amp;feed_id={$feed->getName()}", 'delete-bookmark_' . $feed->getName() ) . "' onclick=\"if ( confirm( '" . esc_js( sprintf( __( "You are about to delete this feed '%s'\n  'Cancel' to stop, 'OK' to delete." ), $feed->getName() ) ) . "' ) ) { return true;}return false;\">" . __( 'Delete' ) . "</a>";
 						echo $this->row_actions( $actions );
 
 						echo '</td>';
 						break;
+
 					case 'url':
 						echo "<td $attributes>$short_url</td>";
 						break;
+
 					case 'interval':
-						echo "<td $attributes>{$feed->interval}</td>";
+						echo "<td $attributes>{$feed->getInterval()}</td>";
+						break;
+
+					defalt:
+						echo "<td $attributes>Unknown column</td>";
 				}
 			}
 ?>

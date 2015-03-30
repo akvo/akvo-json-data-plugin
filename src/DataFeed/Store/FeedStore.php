@@ -58,7 +58,7 @@ interface FeedStore
 	 *
 	 * @return an array of FeedHandles.
 	 */
-	function searchFeeds( $search, $orderby, $offset, $limit );
+	function searchFeeds( $search, $orderby, $order, $offset, $limit );
 
 	/*
 	 * Wordpress actions.

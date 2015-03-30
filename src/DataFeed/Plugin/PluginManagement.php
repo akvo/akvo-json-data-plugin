@@ -24,7 +24,7 @@ class PluginManagement
 
 	public static function admin_menu()
 	{
-		\add_options_page( __('Data feeds', 'data-feed'), __('Data feeds\' options', 'data-feed'), 'manage_options', 'data-feed-options', __NAMESPACE__ . '\OptionsPage::page');
+		\add_options_page( __('Data feeds', 'data-feed'), __('Data feeds\' options', 'data-feed'), 'manage_options', 'data-feed-options', array('DataFeed\Admin\OptionsPage', 'page') );
 	}
 
 	public static function plugins_loaded()

@@ -149,8 +149,8 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 
 		$db->expects( $this->once() )
 			->method( 'prepare' )
-			->with( $this->equalTo( 'SELECT df_name, df_url, df_interval FROM prefixdata_feeds WHERE df_name LIKE %s OR df_url LIKE %s' ),
-				$this->equalTo( array( '%escape_like((( s )))%' ) )
+			->with( $this->equalTo( 'SELECT * FROM prefixdata_feeds WHERE df_name LIKE %s OR df_url LIKE %s ORDER BY %s %s' ),
+				$this->equalTo( array( '%like_escape((( s )))%', 'df_name', 'ASC' ) )
 			)
 			->will( $this->returnValue( 'prepared statement' ) );
 
