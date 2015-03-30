@@ -20,7 +20,7 @@ The shortcode can be used to extract, convert to a string and escape a value fro
 
         [data_feed name="my-example-data-feed" url="http://example.com/json-feed" interval="360" query="fieldname->subfield"]
 
-The shortcode will be substituted with the selected value in the item, or an error message surrounded by tags `&lt;span class="data-feed-error"&gt;...&lt;span&gt;`.
+The shortcode will be substituted with the selected value in the item, or an error message surrounded by tags `<span class="data-feed-error">...</span>`.
 
 ### Parameters
 
