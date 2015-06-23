@@ -17,7 +17,7 @@ class TestTransientFeedCache extends \PHPUnit_Framework_TestCase
 		$item2 = $this->getMockBuilder('item')->getMock();
 		$item1->value = "value1";
 		$item2->value = "value2";
-		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem') )->getMock();
+		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem', 'flush') )->getMock();
 
 		$next->expects( $this->exactly( 2 ) )
 			->method('getCurrentItem')
@@ -42,7 +42,7 @@ class TestTransientFeedCache extends \PHPUnit_Framework_TestCase
 	{
 		$item1 = $this->getMockBuilder('item')->getMock();
 		$item1->value = "value1";
-		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem') )->getMock();
+		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem', 'flush') )->getMock();
 
 		$call = 1;
 

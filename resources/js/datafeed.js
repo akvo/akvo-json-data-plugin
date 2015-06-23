@@ -25,7 +25,9 @@
                                                 'url',
                                                 'o_url',
                                                 'interval',
-                                                'o_interval'
+                                                'o_interval',
+                                                'key',
+                                                'key_parameter'
                                         ], item)) {
                                                 invalidItems.push(item);
                                         }
@@ -52,6 +54,8 @@
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_url %></div>' +
                                              '<div class="datafeed-info-item"><%- interval %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_interval %></div>' +
+                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- key %></div>' +
+                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- key_parameter %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-remove-item"><a href="#">Remove overrides</a></div>' +
                                              '<div class="datafeed-info-item datafeed-info-note-item"></div>'),
                         render: function() {
@@ -64,6 +68,12 @@
                                 }
                                 if (typeof(data.o_interval) == 'undefined') {
                                         data.o_interval = null;
+                                }
+                                if (typeof(data.key) == 'undefined') {
+                                        data.key = null;
+                                }
+                                if (typeof(data.key_parameter) == 'undefined') {
+                                        data.key_parameter = null;
                                 }
                                 this.$el.html(this.template(data));
                                 this.$el.addClass('datafeed-info');
@@ -80,6 +90,12 @@
                                                 case 1:
                                                         var n = text === '' ? null : parseInt(text);
                                                         model.set( {o_interval: n } );
+                                                        break;
+                                                case 2:
+                                                        model.set( {key: text === '' ? null : text});
+                                                        break;
+                                                case 3:
+                                                        model.set( {key_parameter: text === '' ? null : text});
                                                         break;
                                                 }
 

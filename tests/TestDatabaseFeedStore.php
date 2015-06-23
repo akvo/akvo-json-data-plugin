@@ -96,6 +96,8 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 		$result->df_name = 'test';
 		$result->df_interval = 42;
 		$result->df_o_interval = 44;
+		$result->df_key = null;
+		$result->df_key_parameter = null;
 		$result->df_created =  new \DateTime( 'now' );
 
 		$db->expects( $this->once() )
@@ -123,6 +125,8 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 		$result->df_name = 'test';
 		$result->df_interval = 42;
 		$result->df_o_interval = 44;
+		$result->df_key = null;
+		$result->df_key_parameter = null;
 		$result->df_created =  new \DateTime( 'now' );
 
 		$db->expects( $this->once() )

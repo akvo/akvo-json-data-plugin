@@ -22,7 +22,7 @@ use DataFeed\FeedHandleFactory;
 class DatabaseFeedStore implements FeedStore
 {
 
-	const VERSION = '1.0';
+	const VERSION = '1.1';
 
 	const VERSION_OPTION = 'data-feed-database-version';
 
@@ -59,6 +59,12 @@ class DatabaseFeedStore implements FeedStore
 		}
 		if ( $row->df_o_interval !== null ) {
 			$feed->setOInterval( $row->df_o_interval );
+		}
+		if ( $row->df_key !== null ) {
+			$feed->setKey( $row->df_key );
+		}
+		if ( $row->df_key_parameter !== null ) {
+			$feed->setKeyParameter( $row->df_key_parameter );
 		}
 		$feed->setCreated( $row->df_created );
 
@@ -104,6 +110,8 @@ class DatabaseFeedStore implements FeedStore
 		$add( 'df_o_url', $feed->getOURL(), '%s' );
 		$add( 'df_interval', $feed->getInterval(), '%d' );
 		$add( 'df_o_interval', $feed->getOInterval(), '%d' );
+		$add( 'df_key', $feed->getKey(), '%s' );
+		$add( 'df_key_parameter', $feed->getKeyParameter(), '%s' );
 
 		if ( is_array($result) && count($result) === 0 ) {
 			$created = new \DateTime( 'now' );
@@ -137,7 +145,7 @@ class DatabaseFeedStore implements FeedStore
 
 	private function getNamedRow( $name )
 	{
-		$sql = $this->wpdb->prepare( 'SELECT df_name, df_url, df_o_url, df_interval, df_o_interval, df_created FROM ' . $this->tableName() . ' WHERE df_name = %s', $name );
+		$sql = $this->wpdb->prepare( 'SELECT df_name, df_url, df_o_url, df_interval, df_o_interval, df_key, df_key_parameter, df_created FROM ' . $this->tableName() . ' WHERE df_name = %s', $name );
 
 		return $this->wpdb->get_results( $sql );
 	}
@@ -219,6 +227,8 @@ CREATE TABLE $name (
 	df_o_url varchar(512) default null,
 	df_interval int unsigned not null,
 	df_o_interval int unsigned default null,
+    df_key varchar(512) default null,
+    df_key_parameter varchar(512) default null,
     df_created datetime not null
 ) $collate;
 "	;

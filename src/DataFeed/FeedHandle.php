@@ -63,6 +63,20 @@ class FeedHandle
 	private $o_interval;
 
 	/**
+	 * API key to add to the effective URL as query parameter.
+	 *
+	 * @var string
+	 */
+	private $key;
+
+	/**
+	 * Query parameter name to add the API key to.  ('key' if unset).
+	 *
+	 * @var string
+	 */
+	private $key_parameter;
+
+	/**
 	 * Injected feed store.
 	 *
 	 * @var FeedStore.
@@ -102,16 +116,54 @@ class FeedHandle
 		return $this->name;
 	}
 
+	private static function build_url( $parts )
+	{
+		return
+			((isset($parts['scheme'])) ? $parts['scheme'] . '://' : '')
+            .((isset($parts['user'])) ? $parts['user'] . ((isset($parts['pass'])) ? ':' . $parts['pass'] : '') .'@' : '')
+            .((isset($parts['host'])) ? $parts['host'] : '')
+            .((isset($parts['port'])) ? ':' . $parts['port'] : '')
+            .((isset($parts['path'])) ? $parts['path'] : '')
+            .((isset($parts['query'])) ? '?' . $parts['query'] : '')
+            .((isset($parts['fragment'])) ? '#' . $parts['fragment'] : '');
+	}
+
 	/**
 	 * @return string The URL in effect of this feed.
 	 */
 	public function getEffectiveURL()
 	{
-		if (isset($this->o_url) ) {
-			return $this->o_url;
+		if (!empty($this->o_url) ) {
+			$eUrl = $this->o_url;
+		} else {
+			$eUrl = $this->url;
 		}
 
-		return $this->url;
+		$key = $this->getKey();
+		if ( !empty($key) ) {
+			$parts = \parse_url( $eUrl );
+
+			$query = array();
+
+			if ( !empty( $parts['query'] ) ) {
+				\parse_str( $parts['query'], $query );
+			}
+
+			$parameter = $this->getKeyParameter();
+			if ( empty($parameter) ) {
+				$parameter = 'key';
+			} else {
+				$parameter = $this->getKeyParameter();
+			}
+
+			$query[$parameter] = $key;
+
+			$parts['query'] = \http_build_query( $query );
+
+			$eUrl = self::build_url( $parts );
+		}
+
+		return $eUrl;
 	}
 
 	/**
@@ -172,7 +224,11 @@ class FeedHandle
 	 */
 	public function setInterval($interval)
 	{
-		$this->interval = (int) $interval;
+		if ($interval == null) {
+			$this->interval = null;
+		} else {
+			$this->interval = (int) $interval;
+		}
 	}
 
 	/**
@@ -180,7 +236,11 @@ class FeedHandle
 	 */
 	public function setOInterval($interval)
 	{
-		$this->o_interval = (int) $interval;
+		if ($interval == null) {
+			$this->o_interval = null;
+		} else {
+			$this->o_interval = (int) $interval;
+		}
 	}
 
 	/**
@@ -205,6 +265,39 @@ class FeedHandle
 	public function setCreated( $created )
 	{
 		$this->created = $created;
+	}
+
+	/**
+	 * @param string $key the API key.
+	 */
+	public function setKey( $key )
+	{
+		$this->key = $key;
+	}
+
+
+	/**
+	 * @return string $key the API key.
+	 */
+	public function getKey()
+	{
+		return $this->key;
+	}
+
+	/**
+	 * @param string $key_parameter the query parameter to use for the API key.
+	 */
+	public function setKeyParameter( $key_parameter )
+	{
+		$this->key_parameter = $key_parameter;
+	}
+
+	/**
+	 * @return string the query parameter to use for the API key.
+	 */
+	public function getKeyParameter()
+	{
+		return $this->key_parameter;
 	}
 
 	/**
@@ -266,6 +359,8 @@ class FeedHandle
 			'o_url'      => $this->getOURL(),
 			'interval'   => $this->getInterval(),
 			'o_interval' => $this->getOInterval(),
+			'key'        => $this->getKey(),
+			'key_parameter' => $this->getKeyParameter(),
 		);
 	}
 }

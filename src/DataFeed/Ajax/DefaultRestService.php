@@ -190,5 +190,12 @@ class DefaultRestService implements RestService
 			$feed->setOInterval( $data['o_interval'] );
 		}
 
+		if ( \array_key_exists('key', $data) ) {
+			$feed->setKey( $data['key'] );
+		}
+
+		if ( \array_key_exists('key_parameter', $data)) {
+			$feed->setKeyParameter( $data['key_parameter'] );
+		}
 	}
 }

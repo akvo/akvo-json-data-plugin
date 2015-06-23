@@ -24,6 +24,8 @@ class OptionsPage
 		<div class="datafeed-info-item-heading"><?php _e('URL override', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Interval', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Interval override', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('API key', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('API key query parameter', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Delete override', 'data-feed') ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Note', 'data-feed') ?></div>
 		</div>
@@ -33,33 +35,6 @@ class OptionsPage
 
 		self::bootstrapScript();
 		self::addFeedDialog();
-	}
-
-	private static function feedInfo( $feed )
-	{
-		$id = $feed->getName();
-		?>
-		<div class="datafeed-info">
-		<?php
-		self::feedInfoItem( 'name', $feed->getName(), $id, false );
-		self::feedInfoItem( 'url', $feed->getURL(), $id, false );
-		self::feedInfoItem( 'ourl', $feed->getOURL(), $id, 'editable' );
-		self::feedInfoItem( 'interval', $feed->getInterval(), $id, false );
-		self::feedInfoItem( 'ointerval', $feed->getOInterval(), $id, 'editable' );
-		self::feedInfoItem( 'delete', __('delete override', 'data-feed') , $id, 'delete' );
-		?>
-		</div>
-		<?php
-	}
-
-	private static function feedInfoItem( $field, $item, $id, $type )
-	{
-		echo '<div class="datafeed-info-item';
-		if ($type) {
-			echo(' datafeed-info-' . $type . '-item');
-		}
-		echo '" id="datafeed-' . $field . '-' . htmlspecialchars($id) . '">';
-		echo htmlspecialchars($item) . '</div>';
 	}
 
 	private static function addFeedDialog()
@@ -88,7 +63,6 @@ class OptionsPage
 					(function($) {
 							function addFeed(feed) {
 									var view = new wp.datafeed.DataFeedView({model: feed});
-									console.log('Adding feed ' + feed.get('name'));
 									view.render();
 									$('#datafeed-admin-option-feeds').append( view.$el );
 							}
