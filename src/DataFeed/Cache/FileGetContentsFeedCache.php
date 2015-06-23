@@ -72,4 +72,8 @@ class FileGetContentsFeedCache implements FeedCache
 
 		return $data;
 	}
+
+	public function flush( $feedName )
+	{
+	}
 }

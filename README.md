@@ -25,7 +25,7 @@ The shortcode will be substituted with the selected value in the item, or an err
 ### Parameters
 
 * **name** is mandatory and specifies an identifier for the feed.
-* **url** is optional if a feed with the specified name already have been declared and the feed handle exists in the database.  This is the url of the feed.  ** Note: **  due to a bug in Wordpress it is not possible to include characters encoded using html-entities in the url.
+* **url** is optional if a feed with the specified name already have been declared and the feed handle exists in the database.  This is the url of the feed.  ** Note: **  due to a bug in Wordpress it is not possible to include ampersand characters encoded as `&#038;` in the url.  It should work to use `&amp;` though.
 * **interval** is optional and specifies the caching interval in seconds.  If the current item have expired, a new item will be fetched on demand.  Defaults to the saved interval if the feed handle exists in the database, or to 24h if the handle doesn't exist.
 * **query** is optional and can be used to select a particular field of the item.  The syntax is a list of fieldname or array indicies separated with the delimiter '->'.  Fieldnames are used verbatim, (i.e., spaces and other characters are included in the field name.).
 

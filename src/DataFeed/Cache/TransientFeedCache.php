@@ -96,7 +96,7 @@ class TransientFeedCache implements FeedCache
 					/*
 					 * Different URL passed, reset retry timeout.
 					 */
-					$transielt['url'] = $url;
+					$transient['url'] = $url;
 					$transient['fetching'] = 1;
 					$transient['last_attempt'] = time();
 				}
@@ -129,5 +129,12 @@ class TransientFeedCache implements FeedCache
 	private function getTransientName( $feedName )
 	{
 		return 'transient-feed-cache-' . $feedName;
+	}
+
+	public function flush( $feedName )
+	{
+		$transientName = $this->getTransientName( $feedName );
+		\delete_transient( $transientName );
+		$this->nextLevel->flush( $feedName );
 	}
 }

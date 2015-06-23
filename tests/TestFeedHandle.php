@@ -30,6 +30,8 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($feed->getInterval(), 24 * 60 * 60);
 		$this->assertEquals($feed->getOInterval(), null);
 		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60 * 60);
+		$this->assertEquals($feed->getKey(), null);
+		$this->assertEquals($feed->getKeyParameter(), null);
 
 		$oURL = 'https://example.com/feed2';
 		$oInterval = 1;
@@ -53,6 +55,27 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($feed->getOInterval(), null);
 		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60 * 60);
 
+		$feed->setKey('12345');
+
+		$this->assertEquals($feed->getEffectiveURL(), $url . '?key=12345');
+
+		$feed->setKeyParameter('foo');
+
+		$this->assertEquals($feed->getEffectiveURL(), $url . '?foo=12345');
+
+		$feed->setOURL( $oURL . '?bar=baz' );
+
+		$this->assertEquals($feed->getEffectiveURL(), $oURL . '?bar=baz&foo=12345');
+
+		$this->assertEquals($feed->asArray(), array(
+				'name' => $name,
+				'url'  => $url,
+				'o_url' => $oURL . '?bar=baz',
+				'interval' => 24 * 60 * 60,
+				'o_interval' => null,
+				'key' => '12345',
+				'key_parameter' => 'foo',
+			));
 	}
 
 }

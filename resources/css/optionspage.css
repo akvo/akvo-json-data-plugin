@@ -1,0 +1,42 @@
+
+.datafeed-admin-option-feeds {
+    display: table;
+    border-collapse: collapse;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.datafeed-info-heading {
+    display: table-row;
+}
+
+.datafeed-info-item-heading {
+    display: table-cell;
+    font-weight: bold;
+    padding: 0.2em;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.datafeed-info {
+    display: table-row;
+}
+
+.datafeed-info-item {
+    display: table-cell;
+    padding: 0.2em;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.datafeed-info-note-item {
+    color: #c00;
+}
+
+.datafeed-info-editable-item:hover {
+    background-color: #fff;
+}
+
+.datafeed-info-editable-item {
+    cursor:pointer;
+}

@@ -3,7 +3,7 @@
  * Plugin Name: data-feed
  * Plugin URI: https://github.com/akvo/akvo-json-data-plugin
  * Description: Data feed provides an api for fetching items from data feeds in json or xml format.
- * Version: 1.0
+ * Version: 1.1
  * Author: Andreas Jonsson
  * Author URI: http://kreablo.se
  * License: AGPL3
@@ -17,8 +17,9 @@ register_deactivation_hook( __FILE__, 'DataFeed\Plugin\PluginManagement::deactiv
 register_uninstall_hook( __FILE__, 'DataFeed\Plugin\PluginManagement::uninstall' );
 
 define( 'DATA_FEED_PLUGIN_DIR', __DIR__ );
+define( 'DATA_FEED_PLUGIN_VERSION', '1.1' );
 
-foreach ( array( 'admin_menu', 'plugins_loaded' ) as $a ) {
+foreach ( array( 'admin_menu', 'plugins_loaded', 'admin_enqueue_scripts' ) as $a ) {
 	add_action( $a, array( 'DataFeed\Plugin\PluginManagement', $a ) );
 }
 
