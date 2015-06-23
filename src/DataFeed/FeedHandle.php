@@ -172,7 +172,7 @@ class FeedHandle
 	 */
 	public function setInterval($interval)
 	{
-		$this->interval = $interval;
+		$this->interval = (int) $interval;
 	}
 
 	/**
@@ -180,7 +180,7 @@ class FeedHandle
 	 */
 	public function setOInterval($interval)
 	{
-		$this->o_interval = $interval;
+		$this->o_interval = (int) $interval;
 	}
 
 	/**
@@ -235,6 +235,14 @@ class FeedHandle
 	}
 
 	/**
+	 * Removes the feed handle from persistent storage.
+	 */
+	public function remove()
+	{
+		$this->feed_store->removeFeedHandle( $this );
+	}
+
+	/**
 	 * Obtain the current item.
 	 *
 	 * @return Associative array with the decoded data item.
@@ -242,5 +250,22 @@ class FeedHandle
 	public function getCurrentItem()
 	{
 		return $this->feed_item_cache->getCurrentItem($this->getName(), $this->getEffectiveURL(), $this->getEffectiveInterval());
+	}
+
+
+	/**
+	 * Return an associative array representation of this handle.
+	 *
+	 * @return Associative array.
+	 */
+	public function asArray()
+	{
+		return array(
+			'name'       => $this->getName(),
+			'url'        => $this->getURL(),
+			'o_url'      => $this->getOURL(),
+			'interval'   => $this->getInterval(),
+			'o_interval' => $this->getOInterval(),
+		);
 	}
 }

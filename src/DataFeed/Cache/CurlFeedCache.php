@@ -73,4 +73,9 @@ class CurlFeedCache implements FeedCache
 			throw $e;
 		}
 	}
+
+	public function flush( $feedName )
+	{
+	}
+
 }

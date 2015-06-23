@@ -7,19 +7,104 @@ use DataFeed\DataFeed;
 class OptionsPage
 {
 
+	private static function store()
+	{
+		return DataFeed::component( DataFeed::FEED_STORE );
+	}
+
 	public static function page()
 	{
-		$table = new FeedListTable( DataFeed::component( DataFeed::FEED_STORE ) );
-		$table->prepare_items();
-
 		?>
-		<form action="" method="get" class="search-form">
-			 <?php $table->search_box( __( 'Search Data Feeds' ), 'all-data-feeds' ); ?>
-    	</form>
+		<div id="datafeed-admin-options-add"><a id="datafeed-admin-options-add-link" href="#"><?php _e('Add datafeed', 'data-feed'); ?></a></div>
+		<div class="datafeed-admin-options">
+		<div class="datafeed-admin-option-feeds" id="datafeed-admin-option-feeds">
+		<div class="datafeed-info-heading">
+		<div class="datafeed-info-item-heading"><?php _e('Feed name', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('URL', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('URL override', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Interval', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Interval override', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Delete override', 'data-feed') ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Note', 'data-feed') ?></div>
+		</div>
+		</div>
+		</div>
+		<?php
 
-		<form id="form-data-feed-list" action='options-general.php?action=all-data-feeds' method='post'>
-			 <?php $table->display(); ?>
-    	</form>
+		self::bootstrapScript();
+		self::addFeedDialog();
+	}
+
+	private static function feedInfo( $feed )
+	{
+		$id = $feed->getName();
+		?>
+		<div class="datafeed-info">
+		<?php
+		self::feedInfoItem( 'name', $feed->getName(), $id, false );
+		self::feedInfoItem( 'url', $feed->getURL(), $id, false );
+		self::feedInfoItem( 'ourl', $feed->getOURL(), $id, 'editable' );
+		self::feedInfoItem( 'interval', $feed->getInterval(), $id, false );
+		self::feedInfoItem( 'ointerval', $feed->getOInterval(), $id, 'editable' );
+		self::feedInfoItem( 'delete', __('delete override', 'data-feed') , $id, 'delete' );
+		?>
+		</div>
+		<?php
+	}
+
+	private static function feedInfoItem( $field, $item, $id, $type )
+	{
+		echo '<div class="datafeed-info-item';
+		if ($type) {
+			echo(' datafeed-info-' . $type . '-item');
+		}
+		echo '" id="datafeed-' . $field . '-' . htmlspecialchars($id) . '">';
+		echo htmlspecialchars($item) . '</div>';
+	}
+
+	private static function addFeedDialog()
+	{
+		?>
+		<div style="display:none;" id="datafeed-add-feed-dialog">
+		<form id="datafeed-add-feed-dialog-form" action="#">
+		<div><span><label for="name">Name: <input type="text" name="name"></label></span></div>
+		<div><span><label for="url">URL: <input type="text" name="url"></label></span></div>
+		<div><span><label for="interval">Interval: <input type="text" name="interval"></label></span></div>
+		<div><input type="submit" value="<?php echo __('Add', 'data-feed'); ?>" /></div>
+		<div id="datafeed-add-feed-error-msg" style="color:red"></div>
+		</form>
+		</div>
+		<?php
+	}
+
+	private static function bootstrapScript()
+	{
+		$feeds = array();
+		foreach( self::store()->searchFeeds() as $feed ) {
+			$feeds[] = $feed->asArray();
+		}
+		?>
+		<script>
+					(function($) {
+							function addFeed(feed) {
+									var view = new wp.datafeed.DataFeedView({model: feed});
+									console.log('Adding feed ' + feed.get('name'));
+									view.render();
+									$('#datafeed-admin-option-feeds').append( view.$el );
+							}
+							$(document).on('datafeed:model-loaded', function() {
+									var feeds = new window.wp.datafeed.DataFeedCollection();
+									feeds.on('add', addFeed);
+									feeds.on('reset', function (col) {
+											col.each(function(feed) { addFeed(feed); });
+									});
+									feeds.reset(<?php echo json_encode($feeds); ?>);
+							});
+							$('#datafeed-admin-options-add-link').on('datafeed:added', function(event, feed) {
+									addFeed(feed);
+							});
+					})(jQuery);
+		</script>
 		<?php
 
 	}

@@ -37,4 +37,12 @@ interface FeedCache
 	 */
 	function getCurrentItem($feedName, $url, $interval);
 
+
+	/**
+	 * Flush the named item from the cache.
+	 *
+	 * @param string $feedName The name of the feed.
+	 */
+	function flush($feedName);
+
 }

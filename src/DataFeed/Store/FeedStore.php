@@ -49,6 +49,14 @@ interface FeedStore
 
 
 	/**
+	 * Remove a feed instance on persistent storage.
+	 *
+	 * @param DataFeed $feed The feed to remove.
+	 */
+	function removeFeedHandle( FeedHandle $feed );
+
+
+	/**
 	 * Return an array of feeds.
 	 *
 	 * @param string $search a search string to match.  If {@code null}, match all feeds.

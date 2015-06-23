@@ -125,6 +125,16 @@ class DatabaseFeedStore implements FeedStore
 
 	}
 
+	/**
+	 * Remove a feed instance on persistent storage.
+	 *
+	 * @param DataFeed $feed The feed to remove.
+	 */
+	public function removeFeedHandle( FeedHandle $feed )
+	{
+		$this->wpdb->delete( $this->tableName(), array( 'df_name' => $feed->getName() ) ); 
+	}
+
 	private function getNamedRow( $name )
 	{
 		$sql = $this->wpdb->prepare( 'SELECT df_name, df_url, df_o_url, df_interval, df_o_interval, df_created FROM ' . $this->tableName() . ' WHERE df_name = %s', $name );

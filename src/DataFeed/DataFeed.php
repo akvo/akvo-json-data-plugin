@@ -33,6 +33,17 @@ class DataFeed
 	 */
 	const OBJECT_QUERY_LANGUAGE = 'object_query_language';
 
+	/**
+	 * Component key for restful service.
+	 */
+	const REST_SERVICE = 'rest_service';
+
+
+	/**
+	 * Component key for the request data fetcher.
+	 */
+	const REQUEST_DATA_FETCHER = 'request_data_fetcher';
+
 	private static $container = null;
 
 	private static function configure()
@@ -56,6 +67,12 @@ class DataFeed
 				},
 				DataFeed::OBJECT_QUERY_LANGUAGE => function( $c ) {
 					return new \DataFeed\ObjectQuery\SimpleObjectQueryLanguage();
+				},
+				DataFeed::REST_SERVICE => function( $c ) {
+					return new \DataFeed\Ajax\DefaultRestService( $c[DataFeed::FEED_HANDLE_FACTORY], $c[DataFeed::FEED_CACHE], $c[DataFeed::REQUEST_DATA_FETCHER] );
+				},
+				DataFeed::REQUEST_DATA_FETCHER => function( $c ) {
+					return new \DataFeed\Ajax\DefaultRequestDataFetcher();
 				}
 			)
 		);
