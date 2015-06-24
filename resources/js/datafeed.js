@@ -12,10 +12,10 @@
                                 if ( typeof(attrs.url) !== 'string'  || attrs.url === '' ) {
                                         return 'The URL must be set!';
                                 }
-                                if ( attrs.interval !== undefined && attrs.interval !== null && typeof(attrs.interval) !== 'number' || isNaN(attrs.interval)) {
+                                if ( typeof(attrs.interval) !== 'undefined' && attrs.interval !== null && (typeof(attrs.interval) !== 'number' || isNaN(attrs.interval))) {
                                         return 'The interval must be a number, if set.' + typeof(attrs.interval) + ' ' + JSON.stringify(attrs.interval);
                                 }
-                                if ( attrs.o_interval !== undefined && attrs.o_interval !== null && typeof(attrs.o_interval) !== 'number' || isNaN(attrs.o_interval)) {
+                                if ( typeof(attrs.o_interval) !== 'undefined' && attrs.o_interval !== null && (typeof(attrs.o_interval) !== 'number' || isNaN(attrs.o_interval))) {
                                         return 'The o_interval must be a number, if set.';
                                 }
                                 var invalidItems = [];
@@ -56,7 +56,7 @@
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_interval %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- key %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- key_parameter %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-remove-item"><a href="#">Remove overrides</a></div>' +
+                                             '<div class="datafeed-info-item datafeed-info-remove-item"><a href="#">Remove</a></div>' +
                                              '<div class="datafeed-info-item datafeed-info-note-item"></div>'),
                         render: function() {
                                 var data = _.clone(this.model.attributes);

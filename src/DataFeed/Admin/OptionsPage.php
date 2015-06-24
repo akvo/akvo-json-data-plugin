@@ -15,6 +15,7 @@ class OptionsPage
 	public static function page()
 	{
 		?>
+		<h2>Data feed handle attribute override</h2>
 		<div id="datafeed-admin-options-add"><a id="datafeed-admin-options-add-link" href="#"><?php _e('Add datafeed', 'data-feed'); ?></a></div>
 		<div class="datafeed-admin-options">
 		<div class="datafeed-admin-option-feeds" id="datafeed-admin-option-feeds">
@@ -26,7 +27,7 @@ class OptionsPage
 		<div class="datafeed-info-item-heading"><?php _e('Interval override', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('API key', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('API key query parameter', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Delete override', 'data-feed') ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Remove override', 'data-feed') ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Note', 'data-feed') ?></div>
 		</div>
 		</div>
@@ -61,16 +62,20 @@ class OptionsPage
 		?>
 		<script>
 					(function($) {
+							var feeds;
 							function addFeed(feed) {
+									feeds.add(feed, {merge:true});
+							}
+							function addView(feed) {
 									var view = new wp.datafeed.DataFeedView({model: feed});
 									view.render();
 									$('#datafeed-admin-option-feeds').append( view.$el );
 							}
 							$(document).on('datafeed:model-loaded', function() {
-									var feeds = new window.wp.datafeed.DataFeedCollection();
-									feeds.on('add', addFeed);
+									feeds = new window.wp.datafeed.DataFeedCollection();
+									feeds.on('add', addView);
 									feeds.on('reset', function (col) {
-											col.each(function(feed) { addFeed(feed); });
+											col.each(addView);
 									});
 									feeds.reset(<?php echo json_encode($feeds); ?>);
 							});

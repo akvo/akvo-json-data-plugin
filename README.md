@@ -71,3 +71,7 @@ The plugin API functions can be used to fetch feed items in skins and other temp
 	 */
 	public static function item( $name, $url = null, $interval = 86400 )
 
+Upgrade
+-------
+
+Inactivate the plugin before upgrading, to allow database schema updates to take effect.

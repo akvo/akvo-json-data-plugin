@@ -193,7 +193,6 @@ class DatabaseFeedStore implements FeedStore
 			}
 		}
 
-
 		$st = $this->wpdb->prepare( $sql, $args );
 
 		$results =  $this->wpdb->get_results( $st );
