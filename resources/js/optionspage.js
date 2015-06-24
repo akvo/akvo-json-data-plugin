@@ -16,6 +16,8 @@
                                 modal: true
                         });
                         var form = $('#datafeed-add-feed-dialog-form');
+                        form.find('input[type="text"]').val('');
+                        $('#datafeed-add-feed-error-msg').html('');
                         form.on('submit', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
