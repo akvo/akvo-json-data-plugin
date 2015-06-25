@@ -28,7 +28,7 @@ class FileGetContentsFeedCache implements FeedCache
 	/**
 	 * @override FeedCache::getCurrentItem
 	 */
-	public function getCurrentItem($feedName, $url, $interval)
+	public function getCurrentItem($feedName, $url, $interval, $ttl = null )
 	{
 		$parts = \parse_url( $url );
 

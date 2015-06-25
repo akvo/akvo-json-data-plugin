@@ -40,6 +40,17 @@ class DataFeed
 
 
 	/**
+	 * Component key for object cache.
+	 */
+	const OBJECT_CACHE = 'object_cache';
+
+
+	/**
+	 * Component key for transent cache.
+	 */
+	const TRANSIENT_CACHE = 'transient_cache';
+
+	/**
 	 * Component key for the request data fetcher.
 	 */
 	const REQUEST_DATA_FETCHER = 'request_data_fetcher';
@@ -60,7 +71,7 @@ class DataFeed
 					return new \DataFeed\Cache\FileGetContentsFeedCache();
 				},
 				DataFeed::FEED_CACHE => function ( $c ) {
-					return new \DataFeed\Cache\TransientFeedCache( $c[DataFeed::FEED_CACHE_BACKEND] );
+					return new \DataFeed\Cache\TransientFeedCache( $c[DataFeed::FEED_CACHE_BACKEND], $c[DataFeed::TRANSIENT_CACHE] );
 				},
 				DataFeed::FEED_HANDLE_FACTORY => function ( $c ) {
 					return new \DataFeed\Internal\DefaultFeedHandleFactory( $c[DataFeed::FEED_CACHE] );
@@ -73,7 +84,13 @@ class DataFeed
 				},
 				DataFeed::REQUEST_DATA_FETCHER => function( $c ) {
 					return new \DataFeed\Ajax\DefaultRequestDataFetcher();
-				}
+				},
+				DataFeed::OBJECT_CACHE => function( $c ) {
+					return new \DataFeed\Cache\ObjectCache();
+				},
+				DataFeed::TRANSIENT_CACHE => function( $c ) {
+					return new \DataFeed\Cache\TransientCache();
+				},
 			)
 		);
 

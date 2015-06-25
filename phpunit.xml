@@ -2,10 +2,16 @@
   <testsuites>
     <testsuite name="data-feed">
       <file>tests/TestFeedHandle.php</file>
+      <file>tests/TestDefaultObjectMerge.php</file>
+      <file>tests/TestNullPageUrl.php</file>
+      <file>tests/TestNextPageUrl.php</file>
+<!--
+      <file>tests/TestTransientFeedCache.php</file>
+      <file>tests/TestMergingFeedCache.php</file>
       <file>tests/TestCurlFeedCache.php</file>
       <file>tests/TestDatabaseFeedStore.php</file>
       <file>tests/TestSimpleObjectQueryLanguage.php</file>
-      <file>tests/TestTransientFeedCache.php</file>
+-->
     </testsuite>
   </testsuites>
 </phpunit>
