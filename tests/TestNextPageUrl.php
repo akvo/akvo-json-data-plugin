@@ -237,7 +237,13 @@ class TestNextPageUrl extends \PHPUnit_Framework_TestCase
 
 		try {
 			$pu->pageUrl( $meta, '', null, 3 );
-			$this->assertTrue(false, 'Expected Exception not caught!');
+			$this->assertTrue(false, 'Expected Exception not thrown!');
+		} catch (PageUrlFailureException $e) {
+		}
+
+		try {
+			$pu->pageUrl( $meta, '', $item1, 2);
+			$this->assertTrue(false, 'Expected loop detection exception not thrown!');
 		} catch (PageUrlFailureException $e) {
 		}
 

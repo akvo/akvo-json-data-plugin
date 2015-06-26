@@ -20,6 +20,9 @@ namespace DataFeed;
 
 use DataFeed\Store\FeedStore;
 use DataFeed\Cache\FeedCache;
+use DataFeed\DataFeed;
+use DataFeed\Pagination\PageUrlFactory;
+use DataFeed\Pagination\PageUpdateCheckFactory;
 
 /**
  * The feed handle contains the configuration for an instance of a data feed.
@@ -91,21 +94,57 @@ class FeedHandle
 	private $feed_item_cache;
 
 	/**
+	 * Pagination policy.
+	 *
+	 * @var string String describing pagination policy.  Format: ('page_url=<page url component name>[:page url component parameter]&page_update_check=<page update check component name>[:page update check parameter]');
+	 */
+	private $pagination_policy;
+
+	/**
+	 * Overriden pagination policy;
+	 */
+	private $o_pagination_policy;
+
+	/**
+	 * Injected page url factory.
+	 */
+	private $page_url_factory;
+
+	/**
+	 * Injected page_update_check_factory.
+	 */
+	private $page_update_check_factory;
+
+	/**
 	 * Construct a data feed handle.
 	 *
 	 * @param FeedStore $feed_store The feed store.
 	 * @param FeedCache $feed_item_cache The cache to fetch items from.
+	 * @param PageUrlFactory $page_url_factory The page url resolver factory.
+	 * @param PageUpdateCheckFactory $page_update_check_factory The page update checker factory.
 	 * @param string $name     The name of the feed.
 	 * @param string $url      The url of the feed.
 	 * @param int    $interval The fetch interval in seconds.
 	 */
-	public function __construct( FeedStore $feed_store, FeedCache $feed_item_cache, $name, $url = NULL, $interval = 86400 )
+	public function __construct(
+		FeedStore $feed_store,
+		FeedCache $feed_item_cache,
+		PageUrlFactory $page_url_factory,
+		PageUpdateCheckFactory $page_update_check_factory,
+		$name,
+		$url = NULL,
+		$interval = 86400,
+		$pagination_policy = null
+	)
 	{
 		$this->name = $name;
 		$this->url = $url;
-		$this->interval = $interval;
+		$this->interval = $interval !== null ? $interval : 86400;
 		$this->feed_store = $feed_store;
 		$this->feed_item_cache = $feed_item_cache;
+		$this->page_url_factory = $page_url_factory;
+		$this->page_update_check_factory = $page_update_check_factory;
+		$this->setPaginationPolicy( $pagination_policy );
 	}
 
 	/**
@@ -285,6 +324,50 @@ class FeedHandle
 	}
 
 	/**
+	 * Set the pagination policy.
+	 *
+	 * @param string $pagination_policy description of pagination policy.
+	 */
+	public function setPaginationPolicy( $pagination_policy )
+	{
+		$this->pagination_policy = $pagination_policy;
+		if ( ! isset( $this->o_pagination_policy ) ) {
+			$this->configurePaginationPolicy( $pagination_policy );
+		}
+	}
+
+	/**
+	 * @return the pagination policy description.
+	 */
+	public function getPaginationPolicy()
+	{
+		return $this->pagination_policy;
+	}
+
+	/**
+	 * Set the override pagination policy.
+	 *
+	 * @param string $o_pagination_policy description of pagination policy.
+	 */
+	public function setOPaginationPolicy( $o_pagination_policy )
+	{
+		$this->o_pagination_policy = $o_pagination_policy;
+		if ( empty( $o_pagination_policy ) ) {
+			$this->configurePaginationPolicy( $this->getPaginationPolicy() );
+		} else {
+			$this->configurePaginationPolicy( $o_pagination_policy );
+		}
+	}
+
+	/**
+	 * @return the override pagination policy description.
+	 */
+	public function getOPaginationPolicy()
+	{
+		return $this->o_pagination_policy;
+	}
+
+	/**
 	 * @param string $key_parameter the query parameter to use for the API key.
 	 */
 	public function setKeyParameter( $key_parameter )
@@ -354,6 +437,7 @@ class FeedHandle
 	 */
 	public function asArray()
 	{
+
 		return array(
 			'name'       => $this->getName(),
 			'url'        => $this->getURL(),
@@ -362,6 +446,41 @@ class FeedHandle
 			'o_interval' => $this->getOInterval(),
 			'key'        => $this->getKey(),
 			'key_parameter' => $this->getKeyParameter(),
+			'pagination_policy' => $this->getPaginationPolicy(),
+			'o_pagination_policy' => $this->getOPaginationPolicy()
 		);
+	}
+
+
+	private function configurePaginationPolicy( $pagination_policy )
+	{
+		if (empty( $pagination_policy ) ) {
+			$this->feed_item_cache = DataFeed::component( DataFeed::FEED_CACHE );
+			return;
+		}
+
+		$parameters = array();
+
+		parse_str( $pagination_policy, $parameters );
+
+		$page_url = null;
+
+		if (isset($parameters['page-url'])) {
+			$page_url = $parameters['page-url'];
+		}
+		$pageUrlComponent = $this->page_url_factory->create( $page_url );
+
+		$page_update_check = null;
+		if (isset($parameters['page-update-check'])) {
+			$page_update_check = $parameters['page-update-check'];
+		}
+		$pageUpdateCheckComponent = $this->page_update_check_factory->create( $page_update_check );
+
+
+		$this->feed_item_cache = DataFeed::component( DataFeed::MERGING_FEED_CACHE );
+
+		$this->feed_item_cache->setPageUpdateCheck( $pageUpdateCheckComponent );
+		$this->feed_item_cache->setPageUrl( $pageUrlComponent );
+		
 	}
 }

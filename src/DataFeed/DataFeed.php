@@ -19,6 +19,11 @@ class DataFeed
 	const FEED_CACHE = 'feed_cache';
 
 	/**
+	 * Component key for the merging feed cache.
+	 */
+	const MERGING_FEED_CACHE = 'merging_feed_cache';
+
+	/**
 	 * Component key for the feed handle factory.
 	 */
 	const FEED_HANDLE_FACTORY = 'feed_handle_factory';
@@ -44,7 +49,6 @@ class DataFeed
 	 */
 	const OBJECT_CACHE = 'object_cache';
 
-
 	/**
 	 * Component key for transent cache.
 	 */
@@ -54,6 +58,21 @@ class DataFeed
 	 * Component key for the request data fetcher.
 	 */
 	const REQUEST_DATA_FETCHER = 'request_data_fetcher';
+
+	/**
+	 * Component key for the page url resolver factory.
+	 */
+	const PAGE_URL_FACTORY = 'page_url_factory';
+
+	/**
+	 * Component key for the page update checker factory.
+	 */
+	const PAGE_UPDATE_CHECK_FACTORY = 'page_update_check_factory';
+
+	/**
+	 * Component key for the object merger.
+	 */
+	const OBJECT_MERGER = 'object_merger';
 
 	private static $container = null;
 
@@ -74,7 +93,7 @@ class DataFeed
 					return new \DataFeed\Cache\TransientFeedCache( $c[DataFeed::FEED_CACHE_BACKEND], $c[DataFeed::TRANSIENT_CACHE] );
 				},
 				DataFeed::FEED_HANDLE_FACTORY => function ( $c ) {
-					return new \DataFeed\Internal\DefaultFeedHandleFactory( $c[DataFeed::FEED_CACHE] );
+					return new \DataFeed\Internal\DefaultFeedHandleFactory( $c[DataFeed::FEED_CACHE], $c[DataFeed::PAGE_URL_FACTORY], $c[DataFeed::PAGE_UPDATE_CHECK_FACTORY] );
 				},
 				DataFeed::OBJECT_QUERY_LANGUAGE => function( $c ) {
 					return new \DataFeed\ObjectQuery\SimpleObjectQueryLanguage();
@@ -91,10 +110,22 @@ class DataFeed
 				DataFeed::TRANSIENT_CACHE => function( $c ) {
 					return new \DataFeed\Cache\TransientCache();
 				},
+				DataFeed::PAGE_UPDATE_CHECK_FACTORY => function( $c ) {
+					return new \DataFeed\Pagination\PageUpdateCheckFactory();
+				},
+				DataFeed::PAGE_URL_FACTORY => function( $c ) {
+					return new \DataFeed\Pagination\PageUrlFactory();
+				},
+				DataFeed::OBJECT_MERGER => function( $c ) {
+					return new \DataFeed\ObjectMerge\DefaultObjectMerge();
+				}
 			)
 		);
 
 		$container[self::FEED_HANDLE_FACTORY]->setFeedStore( $container[self::FEED_STORE] );
+		$container[self::MERGING_FEED_CACHE] = $container->factory(function ( $c ) {
+				return new \DataFeed\Cache\MergingFeedCache( $c[DataFeed::FEED_CACHE], $c[DataFeed::OBJECT_CACHE], $c[DataFeed::OBJECT_MERGER] );
+			});
 
 		self::$container = $container;
 	}
@@ -117,9 +148,9 @@ class DataFeed
 	 *
 	 * @throws DataFeed\NonexistingFeedException if the url is omitted and the feed doesn't already exist.
 	 */
-	public static function handle( $name, $url = null, $interval = 86400 )
+	public static function handle( $name, $url = null, $interval = 86400, $pagination_policy = null )
 	{
-		$handle = self::component('feed_handle_factory')->create( $name, $url, $interval );
+		$handle = self::component('feed_handle_factory')->create( $name, $url, $interval, $pagination_policy );
 		if ( $handle->load() === \DataFeed\Store\FeedStore::LOAD_RESULT_NONEXISTING ) {
 			$handle->store();
 		}
@@ -138,9 +169,9 @@ class DataFeed
 	 *
 	 * @throws DataFeed\NonexistingFeedException if the url is omitted and the feed doesn't already exist.
 	 */
-	public static function item( $name, $url = null, $interval = 86400 )
+	public static function item( $name, $url = null, $interval = 86400, $pagination_policy = null )
 	{
-		return self::handle( $name, $url, $interval )->getCurrentItem();
+		return self::handle( $name, $url, $interval, $pagination_policy )->getCurrentItem();
 	}
 
 
@@ -162,16 +193,14 @@ class DataFeed
 		}
 
 		try {
-			if ( $atts['interval'] !== null ) {
-				$item = self::item( $atts['name'], $atts['url'], $atts['interval'] );
-			} else {
-				$item = self::item( $atts['name'], $atts['url'] );
-			}
+
+			$item = self::item( $atts['name'], $atts['url'], $atts['interval'], $atts['pagination_policy'] );
+
 			if ( $atts['query'] !== null ) {
 				$ql = self::component( self::OBJECT_QUERY_LANGUAGE );
 				return esc_html( $ql->query( $atts['query'], $item ) );
 			}
-			return esc_html( "$item" );
+			return esc_html( json_encode($item) );
 		} catch (\Exception $e) {
 			return '<span class="data-feed-error">' . \esc_html( "$e" ) . '</span>';
 		}
@@ -185,6 +214,7 @@ class DataFeed
 				'url'      => null,
 				'interval' => null,
 				'query'    => null,
+				'pagination_policy' => null,
 			), $atts );
 
 		unset($atts[0]);
@@ -197,7 +227,7 @@ class DataFeed
 		}
 
 		if (count($atts) !== $count ) {
-			return "Invalid parameters present.  Valid parameters are 'name', 'url', 'interval', and 'query'.";
+			return "Invalid parameters present.  Valid parameters are 'name', 'url', 'interval', 'query' and 'pagination-policy'.";
 		}
 
 		if ($a['name'] === null) {
@@ -217,7 +247,7 @@ class DataFeed
 			 * do the best of the situation and at least allow some
 			 * query parameters in the url.
 			 */
-			$a['url'] = preg_replace( '/&#038;/', '&', $a['url'] );
+			$a['url'] = preg_replace( '/&((#038)|(amp));/', '&', $a['url'] );
 		}
 
 		if ($a['interval'] !== null) {
@@ -225,6 +255,45 @@ class DataFeed
 				return "The parameter 'interval' must be an integer value.";
 			}
 			$a['interval'] = \intval($a['interval']);
+		}
+
+		if ($a['pagination_policy'] !== null) {
+			$a['pagination_policy'] = preg_replace( '/&((#038)|(amp));/', '&', $a['pagination_policy'] );
+
+			$parameters = array();
+			parse_str( $a['pagination_policy'], $parameters );
+
+			\error_log('pagination_policy:' . $a['pagination_policy'] . "\n" . 'parameters: ' . print_r( $parameters, true ) );
+
+			foreach ( array( 'page-url', 'page-update-check' ) as $s ) {
+				if (isset($parameters[$s])) {
+					$component = $parameters[$s];
+					\error_log( 'component: ' . $component );
+					$parts = \explode( ':', $component, 2 );
+					if (count($parts) == 2) {
+						$component = $parts[0];
+						$param = $parts[1];
+					} else {
+						$param = null;
+					}
+					\error_log( 'component: ' . $component );
+					if ( $s == 'page-url' ) {
+						if (! in_array( $component, array( 'null', 'next' ) ) ) {
+							return 'Invalid page-url component: "' . $component . '" supported are "null" and "next".';
+						}
+					}
+					if ( $s == 'page-update-check' ) {
+						if (! in_array( $component, array( 'null', 'version-array' ) ) ) {
+							return 'Invalid page-update-check component: "' . $component . '" supported are "null" and "version-array".';
+						}
+					}
+					unset($parameters[$s]);
+				}
+			}
+
+			if (count($parameters) > 0) {
+				return "Unknown pagination-policy parameters: " . implode(', ', array_keys($parameters));
+			}
 		}
 
 		$atts = $a;

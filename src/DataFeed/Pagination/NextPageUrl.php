@@ -17,7 +17,11 @@ class NextPageUrl implements PageUrl
 
 	public function __construct( $fieldName = 'next' )
 	{
-		$this->fieldName = $fieldName;
+		if ( is_string( $fieldName ) ) {
+			$this->fieldName = $fieldName;
+		} else {
+			$this->fieldName = 'next';
+		}
 	}
 
 	private function next( $item )
@@ -58,6 +62,14 @@ class NextPageUrl implements PageUrl
 			}
 			
 			if ( $nextUrl != $meta[self::PAGE_URL_ARRAY][$page] ) {
+
+				// Loop detection
+				for ($i = 0; $i < $page; $i++) {
+					if ($meta[self::PAGE_URL_ARRAY][$i] == $nextUrl) {
+						throw new PageUrlFailureException('Loop detected for url "' . $nextUrl . '" in paged data feed!');
+					}
+				}
+
 				$meta[self::PAGE_URL_ARRAY][$page] = $nextUrl;
 				return true;
 			}

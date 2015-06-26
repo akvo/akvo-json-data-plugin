@@ -21,7 +21,10 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 		$url = 'http://example.com/feed';
 
 		$feed = new FeedHandle($this->getMockBuilder('DataFeed\Store\FeedStore')->getMock(),
-			$this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock(), $name, $url);
+			$this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock(),
+			$this->getMockBuilder('DataFeed\Pagination\PageUrlFactory')->getMock(),
+			$this->getMockBuilder('DataFeed\Pagination\PageUpdateCheckFactory')->getMock(),
+			$name, $url);
 
 		$this->assertEquals($feed->getName(), $name);
 		$this->assertEquals($feed->getURL(), $url);
@@ -75,6 +78,8 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 				'o_interval' => null,
 				'key' => '12345',
 				'key_parameter' => 'foo',
+				'pagination_policy' => null,
+				'o_pagination_policy' => null
 			));
 	}
 

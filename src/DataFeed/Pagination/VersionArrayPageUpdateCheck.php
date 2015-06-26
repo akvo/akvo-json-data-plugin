@@ -5,7 +5,16 @@ namespace DataFeed\Pagination;
 class VersionArrayPageUpdateCheck implements PageUpdateCheck
 {
 
-	private $fieldName = 'page_versions';
+	private $fieldName;
+
+	public function __construct( $fieldName = 'page_versions' )
+	{
+		if ( is_string( $fieldName ) ) {
+			$this->fieldName = $fieldName;
+		} else {
+			$this->fieldName = 'page_versions';
+		}
+	}
 
 	/**
 	 * Check for updated pages and update the timestamps in the metadata.
@@ -29,6 +38,8 @@ class VersionArrayPageUpdateCheck implements PageUpdateCheck
 		} else if (is_object($firstPage)) {
 			if (isset( $firstPage->{$this->fieldName} ) && is_array( $firstPage->{$this->fieldName} ) ) {
 				$new = $firstPage->{$this->fieldName};
+			} else {
+				$new = array();
 			}
 		} else {
 			$new = array();

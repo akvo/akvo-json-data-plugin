@@ -47,7 +47,7 @@ class MergingFeedCache extends AbstractFeedCache
 	 */
 	private $pageUpdateCheck;
 
-	public function __construct( FeedCache $nextLevel, Cache $cache, ObjectMerge $merger, PageUrl $pageUrl, PageUpdateCheck $pageUpdateCheck )
+	public function __construct( FeedCache $nextLevel, Cache $cache, ObjectMerge $merger, PageUrl $pageUrl = null, PageUpdateCheck $pageUpdateCheck = null )
 	{
 		parent::__construct( $nextLevel, $cache );
 		$this->merger = $merger;
@@ -163,6 +163,16 @@ class MergingFeedCache extends AbstractFeedCache
 		}
 
 		return false;
+	}
+
+	public function setPageUrl( $pageUrl )
+	{
+		$this->pageUrl = $pageUrl;
+	}
+
+	public function setPageUpdateCheck( $pageUpdateCheck )
+	{
+		$this->pageUpdateCheck = $pageUpdateCheck;
 	}
 
 }

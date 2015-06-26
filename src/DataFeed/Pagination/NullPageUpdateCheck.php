@@ -17,7 +17,7 @@ class NullPageUpdateCheck implements PageUpdateCheck
 	 */
 	function checkUpdates( &$meta, $item )
 	{
-		if (!isset $meta[PageUrl::PAGE_URL_ARRAY]) {
+		if (!isset($meta[PageUrl::PAGE_URL_ARRAY])) {
 			return array();
 		}
 		return range(0, count($meta[PageUrl::PAGE_URL_ARRAY]) - 1);
