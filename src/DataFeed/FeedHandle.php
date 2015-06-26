@@ -332,6 +332,7 @@ class FeedHandle
 	 */
 	public function remove()
 	{
+		$this->feed_item_cache->flush( $this->getName() );
 		$this->feed_store->removeFeedHandle( $this );
 	}
 

@@ -125,7 +125,7 @@ abstract class AbstractFeedCache implements FeedCache
 				), self::FETCH_RETRY_INTERVAL );
 		}
 
-		return $this->fetch( $feedName, $url, $interval, $meta );
+		return $this->fetch( $feedName, $url, $interval, $ttl, $meta );
 
 	}
 

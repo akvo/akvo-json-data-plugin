@@ -25,10 +25,7 @@ use DataFeed\Pagination\PageUpdateCheck;
 class MergingFeedCache extends AbstractFeedCache
 {
 
-	/**
-	 * var FeedCache the next layer in the cache stack.
-	 */
-	private $nextLevel;
+	const PAGES_ARRAY = 'pages_array';
 
 	/**
 	 * var ObjectMerge A merger component.
@@ -41,11 +38,6 @@ class MergingFeedCache extends AbstractFeedCache
 	private $nextField = 'next';
 
 	/**
-	 * var Cache a cache instance.
-	 */
-	private $cache;
-
-	/**
 	 * var PageUrl page url resolver.
 	 */
 	private $pageUrl;
@@ -55,9 +47,9 @@ class MergingFeedCache extends AbstractFeedCache
 	 */
 	private $pageUpdateCheck;
 
-	public function __construct( FeedCache $next, Cache $cache, ObjectMerge $merger, PageUrl $pageUrl, PageUpdateCheck $pageUpdateCheck )
+	public function __construct( FeedCache $nextLevel, Cache $cache, ObjectMerge $merger, PageUrl $pageUrl, PageUpdateCheck $pageUpdateCheck )
 	{
-		parent::__construct( $next, $cache );
+		parent::__construct( $nextLevel, $cache );
 		$this->merger = $merger;
 		$this->pageUrl = $pageUrl;
 		$this->pageUpdateCheck = $pageUpdateCheck;
@@ -68,6 +60,54 @@ class MergingFeedCache extends AbstractFeedCache
 		if ($meta === false) {
 			$meta = array();
 		}
+
+		if ( ! isset( $meta[self::PAGES_ARRAY] ) ) {
+			$meta[self::PAGES_ARRAY] = array();
+		}
+
+		$item = array();
+		$now = \time();
+		$meta[self::URL_KEY] = $url;
+		$meta[self::FETCHING_KEY] = 0;
+		$meta[self::TIMESTAMP_KEY] = $now;
+
+		$page = null;
+		$this->fetchPage( $feedName, $url, $meta, null, 0, $page, false );
+
+		$updates = $this->pageUpdateCheck->checkUpdates( $meta, $page );
+
+		$nextUpdate = array_shift( $updates );
+		if ($nextUpdate === 0) {
+			$nextUpdate = array_shift( $updates );
+		}
+
+		$pageNumber = 1;
+		do {
+			$item = $this->merger->merge( $item, $page );
+
+			$update = $nextUpdate === $pageNumber;
+			if ($update) {
+				$nextUpdate = array_shift( $updates );
+			}
+			$prevPage = $page;
+
+			$fetchedSomething = $this->fetchPage( $feedName, $url, $meta, $prevPage, $pageNumber, $page, $update );
+			$pageNumber++;
+
+		} while ($fetchedSomething);
+
+		for ($i = count($meta[self::PAGES_ARRAY]) - 1; $i >= $pageNumber ; $i-- ) {
+
+			// The number of pages have decreased.
+
+			$self->nextLevel->flush( $meta[self::PAGES_ARRAY][$i] );
+			unset( $meta[self::PAGES_ARRAY][$i] );
+		}
+
+		$meta[self::ITEM_KEY] = $item;
+			
+		$this->cache->set( $this->getCacheKey( $feedName ), $meta, $ttl !== null ? $ttl : $interval );
+		return $meta[self::ITEM_KEY];
 	}
 
 	protected function getCacheKey( $feedName )
@@ -85,30 +125,40 @@ class MergingFeedCache extends AbstractFeedCache
 	 *
 	 * @param string $feedName
 	 * @param string $url
-	 * @param int $interval
-	 * @param int $ttl
 	 * @param array &$meta
 	 * @param mixed $prevPage  The previos page, if available, otherwise null.  An exception might be thrown if null is passed, $pageNumber != 0 and no previous url has been cached for the page.
 	 * @param int $pageNumber The page number (0 is the first page).
 	 * @param mixed &$page  The actual page object will be stored in this variable if, a page is fetched.
-	 * @param boolean $onlyOnNewUrl If set, the page will be fetched only if the url of the page have changed.
+	 * @param boolean $doUpdate If set, a recent version of 
 	 *
 	 * @return true if a page was fetched, otherwise false.
 	 *
 	 * @throws PageUrlFailedException if the page url resolution mechanism failed.
 	 */
-	private function fetchPage( $feedName, $url, $interval, $ttl, &$meta, $prevPage, $pageNumber, &$page, $onlyOnNewUrl )
+	private function fetchPage( $feedName, $url, &$meta, $prevPage, $pageNumber, &$page, $doUpdate )
 	{
 		$page = null;
 
 		$pageUrlUpdated = $this->pageUrl->pageUrl( $meta, $url, $prevPage, $pageNumber );
-		if ($onlyOnNewUrl && !$pageUrlUpdated) {
-			return false;
-		}
+		$doUpdate = $doUpdate || $pageUrlUpdated;
 
 		if ( ! empty($meta[PageUrl::PAGE_URL_ARRAY][$pageNumber]) ) {
 			$pageUrl = $meta[PageUrl::PAGE_URL_ARRAY][$pageNumber];
-			$page = $this->nextLevel->getCurrentItem( $this->subFeedName( $feedName, $pageNumber ), $pageUrl, $interval, $ttl );
+			if ($doUpdate) {
+				// Force refetch from next level by setting interval to 0.
+				$interval = 0;
+			} else {
+				// Avoid refetch from next level by setting interval to 50 years.
+				$interval = 1576800000;
+			}
+
+			$subFeed = $this->subFeedName( $feedName, $pageNumber );
+
+			if ( !isset( $meta[self::PAGES_ARRAY][$pageNumber] ) || $meta[self::PAGES_ARRAY][$pageNumber] != $subFeed ) {
+				$meta[self::PAGES_ARRAY][$pageNumber] = $subFeed;
+			}
+
+			$page = $this->nextLevel->getCurrentItem( $subFeed, $pageUrl, $interval, 0 );
 			return true;
 		}
 

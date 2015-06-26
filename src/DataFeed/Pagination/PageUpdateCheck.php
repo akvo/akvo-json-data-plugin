@@ -19,7 +19,7 @@ interface PageUpdateCheck
 	 * in the meta array at index PAGE_UPDATES.
 	 *
 	 * @param array $meta The metadata.
-	 * @param mixed $item The currently known item.
+	 * @param mixed $firstPage The current first page.
 	 *
 	 * @return array of page indicies that have been updated.
 	 */
