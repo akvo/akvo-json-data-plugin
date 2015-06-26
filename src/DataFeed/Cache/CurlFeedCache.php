@@ -28,7 +28,7 @@ class CurlFeedCache implements FeedCache
 	/**
 	 * @override FeedCache::getCurrentItem
 	 */
-	public function getCurrentItem($feedName, $url, $interval)
+	public function getCurrentItem($feedName, $url, $interval, $ttl = null )
 	{
 		$ch = \curl_init( $url );
 		try {

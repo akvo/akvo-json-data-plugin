@@ -29,13 +29,14 @@ interface FeedCache
 	 *
 	 * @param string $feedName The name of the feed.
 	 * @param string $url The url of the feed.
-	 * @param int $interval The fetch interval.
+	 * @param int $interval The fetch interval in seconds.
+	 * @param int $ttl Time-to-live in seconds.  If set, use this ttl when caching.  If not set, use $interval as ttl.
 	 *
 	 * @return Associative array with the decoded data item.
 	 *
 	 * @throws FeedCacheException if no item could be fetched.
 	 */
-	function getCurrentItem($feedName, $url, $interval);
+	function getCurrentItem($feedName, $url, $interval, $ttl = null);
 
 
 	/**

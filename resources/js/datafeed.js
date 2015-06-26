@@ -4,19 +4,58 @@
 
         $(document).ready(function() {
 
+                function validatePaginationPolicy( pp, msgs ) {
+                        if (typeof(pp) !== 'string') {
+                                msgs.push('The pagination policy must be a string');
+                        }
+                        if (pp !== '') {
+                                var parts = pp.split( '&' );
+                                for (var i = 0; i < parts.length; i++) {
+                                        var name = parts[i];
+                                        var j = name.indexOf('=');
+                                        if (j < 0) {
+                                                msgs.push('Invalid pagination policy parameter: ' + name + ' expected to be on the form &lt;key&gt;=&lt;value&gt;');
+                                        } else {
+                                                var component = name.substring(j + 1);
+                                                name = name.substring(0, j);
+                                                var k = component.indexOf(':');
+                                                if (k >= 0) {
+                                                        component = component.substring(0, k);
+                                                }
+                                                if (name == 'page-url') {
+                                                        if (!_.contains([ 'null', 'next' ], component)) {
+                                                                msgs.push('Invalid page-url for pagination policy: ' + component + ' suppored are "null" and "next"');
+                                                        }
+                                                } else if (name == 'page-update-check') {
+                                                        if (!_.contains([ 'null', 'version-array' ], component)) {
+                                                                msgs.push('Invalid page-update-check for pagination policy: ' + component + ' suppored are "null" and "version-array"');
+                                                        }
+                                                } else {
+                                                        msgs.push('Invalid pagination policy component: ' + name);
+                                                }
+
+                                        }
+                                }
+                        }
+                }
+
                 var DataFeed = Backbone.Model.extend({
                         validate: function( attrs, options ) {
+                                var msgs = [];
                                 if ( typeof(attrs.name) !== 'string' || attrs.name === '' ) {
-                                        return 'Name must be set!';
+                                        msgs.push('Name must be set!');
                                 }
                                 if ( typeof(attrs.url) !== 'string'  || attrs.url === '' ) {
-                                        return 'The URL must be set!';
+                                        msgs.push('The URL must be set!');
                                 }
                                 if ( typeof(attrs.interval) !== 'undefined' && attrs.interval !== null && (typeof(attrs.interval) !== 'number' || isNaN(attrs.interval))) {
-                                        return 'The interval must be a number, if set.' + typeof(attrs.interval) + ' ' + JSON.stringify(attrs.interval);
+                                        msgs.push('The interval must be a number, if set.' + typeof(attrs.interval) + ' ' + JSON.stringify(attrs.interval));
                                 }
                                 if ( typeof(attrs.o_interval) !== 'undefined' && attrs.o_interval !== null && (typeof(attrs.o_interval) !== 'number' || isNaN(attrs.o_interval))) {
-                                        return 'The o_interval must be a number, if set.';
+                                        msgs.push('The o_interval must be a number, if set.');
+                                }
+                                if ( typeof(attrs.o_pagination_policy) !== 'undefined' && attrs.o_pagination_policy !== null) {
+                                        validatePaginationPolicy( attrs.o_pagination_policy, msgs );
                                 }
                                 var invalidItems = [];
                                 _.each(_.keys(attrs), function (item) {
@@ -27,13 +66,23 @@
                                                 'interval',
                                                 'o_interval',
                                                 'key',
-                                                'key_parameter'
+                                                'key_parameter',
+                                                'pagination_policy',
+                                                'o_pagination_policy'
                                         ], item)) {
                                                 invalidItems.push(item);
                                         }
                                 });
                                 if (invalidItems.length > 0) {
-                                        return 'Unknown properties: ' + JSON.stringify(invalidItems);
+                                        msgs.push('Unknown properties: ' + JSON.stringify(invalidItems));
+                                }
+                                if (msgs.length > 0) {
+                                        var message = '<ul>';
+                                        for (var i = 0; i < msgs.length; i++) {
+                                                message += '<li>' + msgs[i] + '</li>';
+                                        }
+                                        message += '</ul>';
+                                        return message;
                                 }
                         },
                         urlRoot: ajaxurl,
@@ -56,6 +105,8 @@
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_interval %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- key %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-editable-item"><%- key_parameter %></div>' +
+                                             '<div class="datafeed-info-item"><%- pagination_policy %></div>' +
+                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_pagination_policy %></div>' +
                                              '<div class="datafeed-info-item datafeed-info-remove-item"><a href="#">Remove</a></div>' +
                                              '<div class="datafeed-info-item datafeed-info-note-item"></div>'),
                         render: function() {
@@ -74,6 +125,12 @@
                                 }
                                 if (typeof(data.key_parameter) == 'undefined') {
                                         data.key_parameter = null;
+                                }
+                                if (typeof(data.pagination_policy) == 'undefined') {
+                                        data.pagination_policy = null;
+                                }
+                                if (typeof(data.o_pagination_policy) == 'undefined') {
+                                        data.o_pagination_policy = null;
                                 }
                                 this.$el.html(this.template(data));
                                 this.$el.addClass('datafeed-info');
@@ -96,6 +153,9 @@
                                                         break;
                                                 case 3:
                                                         model.set( {key_parameter: text === '' ? null : text});
+                                                        break;
+                                                case 4:
+                                                        model.set( {o_pagination_policy: text === '' ? null : text});
                                                         break;
                                                 }
 

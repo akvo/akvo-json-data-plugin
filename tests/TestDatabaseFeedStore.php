@@ -16,10 +16,17 @@ require_once __DIR__ . '/TestDatabaseFeedStoreMockFunctions.php';
 class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 {
 
+	private function newFeedHandle( $store, $name, $url = null, $interval = null )
+	{
+		$cache = $this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock();
+		$pageUrl = $this->getMockBuilder('DataFeed\Pagination\PageUrlFactory')->getMock();
+		$pageUpdateCheck = $this->getMockBuilder('DataFeed\Pagination\PageUpdateCheckFactory')->getMock();
+		return new FeedHandle( $store, $cache, $pageUrl, $pageUpdateCheck, $name, $url, $interval );
+	}
+
 	public function testLoadNonexisting()
 	{
 		$db = $this->getMockBuilder('Test\wpdb')->setMethods(array('prepare', 'get_results'))->getMock();
-		$cache = $this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock();
 		$feedHandleFactory = $this->getMockBuilder('DataFeed\FeedHandleFactory')->getMock();
 
 		$db->prefix = 'prefix';
@@ -31,7 +38,7 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 
 		$store = new DatabaseFeedStore( $db, $feedHandleFactory );
 
-		$feed = new FeedHandle( $store, $cache, 'test' );
+		$feed = $this->newFeedHandle( $store, 'test' );
 
 		$this->assertEquals($store->loadFeedHandle( $feed ), FeedStore::LOAD_RESULT_NONEXISTING );
 	}
@@ -40,7 +47,6 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 	public function testStoreNonexisting()
 	{
 		$db = $this->getMockBuilder('Test\wpdb')->setMethods(array('prepare', 'get_results', 'insert'))->getMock();
-		$cache = $this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock();
 		$feedHandleFactory = $this->getMockBuilder('DataFeed\FeedHandleFactory')->getMock();
 
 		$db->prefix = 'prefix';
@@ -55,7 +61,7 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 
 		$store = new DatabaseFeedStore( $db, $feedHandleFactory );
 
-		$feed = new FeedHandle( $store, $cache, 'test' );
+		$feed = $this->newFeedHandle( $store, 'test' );
 
 		$feed->store();
 	}
@@ -63,7 +69,6 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 	public function testStoreExisting()
 	{
 		$db = $this->getMockBuilder('Test\wpdb')->setMethods(array('prepare', 'get_results', 'update'))->getMock();
-		$cache = $this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock();
 		$feedHandleFactory = $this->getMockBuilder('DataFeed\FeedHandleFactory')->getMock();
 
 		$db->prefix = 'prefix';
@@ -78,7 +83,7 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 
 		$store = new DatabaseFeedStore( $db, $feedHandleFactory );
 
-		$feed = new FeedHandle( $store, $cache, 'test' );
+		$feed = $this->newFeedHandle( $store, 'test' );
 
 		$feed->store();
 	}
@@ -99,6 +104,8 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 		$result->df_key = null;
 		$result->df_key_parameter = null;
 		$result->df_created =  new \DateTime( 'now' );
+		$result->df_pagination_policy = null;
+		$result->df_o_pagination_policy = null;
 
 		$db->expects( $this->once() )
 			->method( 'get_results' )
@@ -106,7 +113,7 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 
 		$store = new DatabaseFeedStore( $db, $feedHandleFactory );
 
-		$feed = new FeedHandle( $store, $cache, 'test' );
+		$feed = $this->newFeedHandle( $store, 'test', 43 );
 
 		$this->assertEquals($store->loadFeedHandle( $feed ), FeedStore::LOAD_RESULT_DIRTY );
 
@@ -128,6 +135,8 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 		$result->df_key = null;
 		$result->df_key_parameter = null;
 		$result->df_created =  new \DateTime( 'now' );
+		$result->df_pagination_policy = null;
+		$result->df_o_pagination_policy = null;
 
 		$db->expects( $this->once() )
 			->method( 'get_results' )
@@ -135,7 +144,7 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 
 		$store = new DatabaseFeedStore( $db, $feedHandleFactory );
 
-		$feed = new FeedHandle( $store, $cache, 'test', 'http://example.com', 42 );
+		$feed = $this->newFeedHandle( $store, 'test', 'http://example.com', 42 );
 
 		$this->assertEquals($store->loadFeedHandle( $feed ), FeedStore::LOAD_RESULT_CLEAN );
 

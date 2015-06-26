@@ -27,6 +27,8 @@ class OptionsPage
 		<div class="datafeed-info-item-heading"><?php _e('Interval override', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('API key', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('API key query parameter', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Pagination policy', 'data-feed'); ?></div>
+		<div class="datafeed-info-item-heading"><?php _e('Pagination policy override', 'data-feed'); ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Remove override', 'data-feed') ?></div>
 		<div class="datafeed-info-item-heading"><?php _e('Note', 'data-feed') ?></div>
 		</div>

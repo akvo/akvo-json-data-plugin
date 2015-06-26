@@ -22,7 +22,7 @@ use DataFeed\FeedHandleFactory;
 class DatabaseFeedStore implements FeedStore
 {
 
-	const VERSION = '1.1';
+	const VERSION = '1.2';
 
 	const VERSION_OPTION = 'data-feed-database-version';
 
@@ -65,6 +65,14 @@ class DatabaseFeedStore implements FeedStore
 		}
 		if ( $row->df_key_parameter !== null ) {
 			$feed->setKeyParameter( $row->df_key_parameter );
+		}
+		if ( $row->df_o_pagination_policy !== null ) {
+			$feed->setOPaginationPolicy( $row->df_o_pagination_policy );
+		}
+		if ( $feed->getPaginationPolicy() === null ) {
+			$feed->setPaginationPolicy( $row->df_pagination_policy );
+		} else if ( $feed->getPaginationPolicy() != $row->df_pagination_policy ) {
+			$dirty = true;
 		}
 		$feed->setCreated( $row->df_created );
 
@@ -112,6 +120,8 @@ class DatabaseFeedStore implements FeedStore
 		$add( 'df_o_interval', $feed->getOInterval(), '%d' );
 		$add( 'df_key', $feed->getKey(), '%s' );
 		$add( 'df_key_parameter', $feed->getKeyParameter(), '%s' );
+		$add( 'df_pagination_policy', $feed->getPaginationPolicy(), '%s' );
+		$add( 'df_o_pagination_policy', $feed->getOPaginationPolicy(), '%s' );
 
 		if ( is_array($result) && count($result) === 0 ) {
 			$created = new \DateTime( 'now' );
@@ -145,7 +155,7 @@ class DatabaseFeedStore implements FeedStore
 
 	private function getNamedRow( $name )
 	{
-		$sql = $this->wpdb->prepare( 'SELECT df_name, df_url, df_o_url, df_interval, df_o_interval, df_key, df_key_parameter, df_created FROM ' . $this->tableName() . ' WHERE df_name = %s', $name );
+		$sql = $this->wpdb->prepare( 'SELECT df_name, df_url, df_o_url, df_interval, df_o_interval, df_key, df_key_parameter, df_pagination_policy, df_o_pagination_policy, df_created FROM ' . $this->tableName() . ' WHERE df_name = %s', $name );
 
 		return $this->wpdb->get_results( $sql );
 	}
@@ -228,6 +238,8 @@ CREATE TABLE $name (
 	df_o_interval int unsigned default null,
     df_key varchar(512) default null,
     df_key_parameter varchar(512) default null,
+    df_pagination_policy varchar(512) default null,
+    df_o_pagination_policy varchar(512) default null,
     df_created datetime not null
 ) $collate;
 "	;

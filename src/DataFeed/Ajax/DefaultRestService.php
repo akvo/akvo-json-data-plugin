@@ -62,7 +62,9 @@ class DefaultRestService implements RestService
 					$this->error(405, sprintf(__('Unsupported method: %s', 'data-feed'), $method ));
 			}
 		} catch (\Exception $e) {
-			$this->error(500, sprintf(__('Caught exception %s', 'data-feed'), $e));
+			$msg = "" . $e;
+			str_replace( "\n", '<br />', $msg );
+			$this->error(500, sprintf(__('Caught exception %s', 'data-feed'), $msg));
 		}
 		exit(0);
 	}
@@ -91,8 +93,6 @@ class DefaultRestService implements RestService
 
 	private function put( $item )
 	{
-		\error_log( 'PUT ' . \json_encode($this->getData()) );
-
 		$data = $this->getData();
 
 		if (!isset($data['url'])) {
@@ -118,8 +118,6 @@ class DefaultRestService implements RestService
 
 	private function patch( $item )
 	{
-		\error_log( 'PATCH ' . \json_encode($this->getData()) );
-
 		try {
 			$feed = $this->factory->create( $item, null, null );
 			$feed->load();
@@ -138,8 +136,6 @@ class DefaultRestService implements RestService
 
 	private function delete( $item )
 	{
-		\error_log( 'DELETE ' . \json_encode($this->getData()) );
-
 		try {
 			$feed = $this->factory->create( $item, null, null );
 			$feed->load();
@@ -154,8 +150,6 @@ class DefaultRestService implements RestService
 
 	private function get( $item )
 	{
-		\error_log( 'GET ' . \json_encode($this->getData()) );
-
 		try {
 			$feed = $this->factory->create( $item, null, null );
 			$feed->load();
@@ -196,6 +190,14 @@ class DefaultRestService implements RestService
 
 		if ( \array_key_exists('key_parameter', $data)) {
 			$feed->setKeyParameter( $data['key_parameter'] );
+		}
+
+		if ( \array_key_exists('o_pagination_policy', $data)) {
+			$feed->setOPaginationPolicy( $data['o_pagination_policy'] );
+		}
+
+		if ( \array_key_exists('pagination_policy', $data)) {
+			$feed->setPaginationPolicy( $data['pagination_policy'] );
 		}
 	}
 }

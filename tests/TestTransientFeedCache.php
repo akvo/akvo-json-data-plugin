@@ -6,10 +6,33 @@ use DataFeed\Cache\TransientFeedCache;
 use DataFeed\Cache\FeedCache;
 use DataFeed\Cache\FeedCacheException;
 
-require_once __DIR__ . '/TestTransientFeedCacheMockFunctions.php';
-
 class TestTransientFeedCache extends \PHPUnit_Framework_TestCase
 {
+
+	private function setupInnerCache()
+	{
+		$innerCache = $this->getMockBuilder('DataFeed\Cache\Cache')->setMethods( array( 'get', 'set', 'delete') )->getMock();
+
+		$transients = array();
+
+		$innerCache->expects( $this->any() )
+			->method('get')
+			->will( $this->returnCallback( function ( $name ) use (&$transients) {
+						if (isset($transients[$name]) ) {
+							return $transients[$name];
+						}
+						return false;
+					}));
+
+		$innerCache->expects( $this->any() )
+			->method('set')
+			->will( $this->returnCallback( function( $key, $value, $interval ) use (&$transients) {
+						$transients[$key] = $value;
+						return true;
+					}));
+
+		return $innerCache;
+	}
 
 	public function test()
 	{
@@ -23,7 +46,7 @@ class TestTransientFeedCache extends \PHPUnit_Framework_TestCase
 			->method('getCurrentItem')
 			->will( $this->onConsecutiveCalls( $item1, $item2 ) );
 
-		$cache = new TransientFeedCache( $next );
+		$cache = new TransientFeedCache( $next, $this->setupInnerCache() );
 
 		$item = $cache->getCurrentItem( 'name', 'http://example.com', 1 );
 		$this->assertSame( $item, $item1 );
@@ -43,6 +66,7 @@ class TestTransientFeedCache extends \PHPUnit_Framework_TestCase
 		$item1 = $this->getMockBuilder('item')->getMock();
 		$item1->value = "value1";
 		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem', 'flush') )->getMock();
+		$innerCache = $this->getMockBuilder('DataFeed\Cache\Cache')->setMethods( array( 'get', 'set', 'delete') )->getMock();
 
 		$call = 1;
 
@@ -61,7 +85,8 @@ class TestTransientFeedCache extends \PHPUnit_Framework_TestCase
 						return $item1;
 					} ) );
 
-		$cache = new TransientFeedCache( $next );
+
+		$cache = new TransientFeedCache( $next, $this->setupInnerCache() );
 
 		try {
 			$item = $cache->getCurrentItem( 'name', 'http://example.com', 1 );
