@@ -2,6 +2,8 @@
 
 namespace DataFeed\Pagination;
 
+use DataFeed\DataFeed;
+
 /**
  * A page url selector that supports pagination via a next url in the previous item.
  */
@@ -24,7 +26,7 @@ class NextPageUrl implements PageUrl
 		}
 	}
 
-	private function next( $item )
+	private function next( $item, $mainUrl )
 	{
 		if (is_object($item)) {
 			$url = isset($item->{$this->fieldName}) ? $item->{$this->fieldName} : null;
@@ -36,7 +38,23 @@ class NextPageUrl implements PageUrl
 		if (empty( $url )) {
 			return null;
 		}
-		return $url;
+
+		$parts = parse_url( $url );
+		if (isset($parts['scheme'])) {
+			return $url;
+		}
+		$mainParts = parse_url( $mainUrl );
+		$parts['scheme'] = $mainParts['scheme'];
+		if (!isset($parts['host'])) {
+			$parts['host'] = $mainParts['host'];
+			if (!isset($parts['port'])) {
+				$parts['port'] = $mainParts['port'];
+			}
+		}
+		if (!isset($parts['path'])) {
+			$parts['path'] = $mainParts['path'];
+		}
+		return DataFeed::build_url( $parts );
 	}
 
 	public function pageUrl( &$meta, $url, $prevPage, $page )
@@ -51,7 +69,7 @@ class NextPageUrl implements PageUrl
 					throw new PageUrlFailureException('No previous page and no cached URL for page number ' + $page + ' of feed ' . $url . '!' );
 				}
 			}
-			$nextUrl = $this->next( $prevPage );
+			$nextUrl = $this->next( $prevPage, $url );
 		}
 
 		if ( isset( $meta[self::PAGE_URL_ARRAY] ) && isset( $meta[self::PAGE_URL_ARRAY][$page] )) {

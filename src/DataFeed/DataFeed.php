@@ -300,5 +300,21 @@ class DataFeed
 
 	}
 
+
+	/**
+	 * Utility function for generating a URL from the parts obtained from parse_url.
+	 */
+	public static function build_url( $parts )
+	{
+		return
+			((isset($parts['scheme'])) ? $parts['scheme'] . '://' : '')
+            .((isset($parts['user'])) ? $parts['user'] . ((isset($parts['pass'])) ? ':' . $parts['pass'] : '') .'@' : '')
+            .((isset($parts['host'])) ? $parts['host'] : '')
+            .((isset($parts['port'])) ? ':' . $parts['port'] : '')
+            .((isset($parts['path'])) ? $parts['path'] : '')
+            .((isset($parts['query'])) ? '?' . $parts['query'] : '')
+            .((isset($parts['fragment'])) ? '#' . $parts['fragment'] : '');
+	}
+
 }
 
