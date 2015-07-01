@@ -1,14 +1,23 @@
 <?php
 
 namespace DataFeed\Pagination;
+use DataFeed\ObjectQuery\ObjectQueryLanguage;
 
 class PageUrlFactory
 {
 
+
+	private $objectQueryLanguage;
+
+	public function __construct( ObjectQueryLanguage $objectQueryLanguage )
+	{
+		$this->objectQueryLanguage = $objectQueryLanguage;
+	}
+
 	public function create( $arg )
 	{
 		if ( empty( $arg ) ) {
-			return new NextPageUrl();
+			return new NextPageUrl( $objectQuerlyLanguage );
 		}
 
 		$parts = explode( ':', $arg, 2 );
@@ -25,7 +34,7 @@ class PageUrlFactory
 			case 'null':
 				return new NullPageUrl();
 			case 'next':
-				return new NextPageUrl($parameter);
+				return new NextPageUrl( $objectQueryLanguage, $parameter );
 		}
 
 		throw new UnknownPageUrlComponentNameException( $name );

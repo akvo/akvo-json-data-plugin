@@ -5,13 +5,37 @@ namespace Test;
 use DataFeed\Pagination\PageUrl;
 use DataFeed\Pagination\NextPageUrl;
 use DataFeed\Pagination\PageUrlFailureException;
+use DataFeed\ObjectQuery\SimpleObjectQueryLanguage;
 
 class TestNextPageUrl extends \PHPUnit_Framework_TestCase
 {
 
+	private function mockQueryLanguage() {
+		$ql = $this->getMockBuilder('DataFeed\ObjectQuery\ObjectQueryLanguage')->setMethods( array( 'query' ) )->getMock();
+
+		$ql->expects( $this->any() )
+			->method( 'query' )
+			->will( $this->returnCallback( function( $expr, $item ) {
+						if (is_object($item)) {
+							if (isset($item->next)) {
+								return $item->next;
+							}
+							return null;
+						} else {
+							if (isset($item['next'])) {
+								return $item['next'];
+							}
+							return null;
+						}
+					} ) );
+
+		return $ql;
+	}
+
 	public function test()
 	{
-		$pu = new NextPageUrl();
+
+		$pu = new NextPageUrl( $this->mockQueryLanguage() );
 
 		$item = array(
 			array( 'next' => 'http://1' ),
@@ -122,7 +146,8 @@ class TestNextPageUrl extends \PHPUnit_Framework_TestCase
 
 	public function testObject()
 	{
-		$pu = new NextPageUrl();
+
+		$pu = new NextPageUrl( $this->mockQueryLanguage() );
 
 		$item1 = new \stdClass();
 		$item2 = new \stdClass();
@@ -247,5 +272,32 @@ class TestNextPageUrl extends \PHPUnit_Framework_TestCase
 		} catch (PageUrlFailureException $e) {
 		}
 
+	}
+
+	public function testRelativeUrl()  {
+
+		$pu = new NextPageUrl( $this->mockQueryLanguage() );
+
+		$meta = array();
+
+		$this->assertTrue($pu->pageUrl( $meta, 'http://foo',  null, 0 ));
+
+		$this->assertTrue($pu->pageUrl( $meta, 'http://foo', array( 'next' => '/bar' ), 1 ));
+
+		$this->assertEquals( array( 'http://foo', 'http://foo/bar' ), $meta[PageUrl::PAGE_URL_ARRAY] );
+	}
+
+	public function testNextFieldPath() {
+
+		$pu = new NextPageUrl( new SimpleObjectQueryLanguage(), 'foo->next' );
+
+		$meta = array();
+
+		$this->assertTrue($pu->pageUrl( $meta, 'http://foo',  null, 0 ));
+
+		$this->assertTrue($pu->pageUrl( $meta, 'http://foo', array( 'foo' => array( 'next' => 'http://bar' ) ), 1 ));
+
+		$this->assertEquals( array( 'http://foo', 'http://bar' ), $meta[PageUrl::PAGE_URL_ARRAY] );
+		
 	}
 }

@@ -19,7 +19,7 @@ class TestDatabaseFeedStore extends \PHPUnit_Framework_TestCase
 	private function newFeedHandle( $store, $name, $url = null, $interval = null )
 	{
 		$cache = $this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock();
-		$pageUrl = $this->getMockBuilder('DataFeed\Pagination\PageUrlFactory')->getMock();
+		$pageUrl = $this->getMockBuilder('DataFeed\Pagination\PageUrlFactory')->disableOriginalConstructor()->getMock();
 		$pageUpdateCheck = $this->getMockBuilder('DataFeed\Pagination\PageUpdateCheckFactory')->getMock();
 		return new FeedHandle( $store, $cache, $pageUrl, $pageUpdateCheck, $name, $url, $interval );
 	}

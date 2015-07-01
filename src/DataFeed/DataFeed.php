@@ -114,7 +114,7 @@ class DataFeed
 					return new \DataFeed\Pagination\PageUpdateCheckFactory();
 				},
 				DataFeed::PAGE_URL_FACTORY => function( $c ) {
-					return new \DataFeed\Pagination\PageUrlFactory();
+					return new \DataFeed\Pagination\PageUrlFactory( $c[DataFeed::OBJECT_QUERY_LANGUAGE] );
 				},
 				DataFeed::OBJECT_MERGER => function( $c ) {
 					return new \DataFeed\ObjectMerge\DefaultObjectMerge();

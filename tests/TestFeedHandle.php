@@ -22,7 +22,7 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 
 		$feed = new FeedHandle($this->getMockBuilder('DataFeed\Store\FeedStore')->getMock(),
 			$this->getMockBuilder('DataFeed\Cache\FeedCache')->getMock(),
-			$this->getMockBuilder('DataFeed\Pagination\PageUrlFactory')->getMock(),
+			$this->getMockBuilder('DataFeed\Pagination\PageUrlFactory')->disableOriginalConstructor()->getMock(),
 			$this->getMockBuilder('DataFeed\Pagination\PageUpdateCheckFactory')->getMock(),
 			$name, $url);
 
