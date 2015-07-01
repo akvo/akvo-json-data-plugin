@@ -64,7 +64,7 @@ class FileGetContentsFeedCache implements FeedCache
 
 		$contents = file_get_contents( $u );
 
-		$data = \json_decode( $contents );
+		$data = \json_decode( $contents, true );
 
 		if ( $data === null ) {
 			throw new FeedCacheException( 'The current data item in data feed ' . $feedName . ' could not be parsed.' );
