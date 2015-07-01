@@ -265,7 +265,7 @@ class DataFeed
 
 			\error_log('pagination_policy:' . $a['pagination_policy'] . "\n" . 'parameters: ' . print_r( $parameters, true ) );
 
-			foreach ( array( 'page-url', 'page-update-check' ) as $s ) {
+			foreach ( array( 'page-url', 'page-update-check', 'limit' ) as $s ) {
 				if (isset($parameters[$s])) {
 					$component = $parameters[$s];
 					\error_log( 'component: ' . $component );
@@ -285,6 +285,11 @@ class DataFeed
 					if ( $s == 'page-update-check' ) {
 						if (! in_array( $component, array( 'null', 'version-array' ) ) ) {
 							return 'Invalid page-update-check component: "' . $component . '" supported are "null" and "version-array".';
+						}
+					}
+					if ( $s == 'limit' ) {
+						if ( !\is_int($component) ) {
+							return 'Invalid limit, must be an integer: "' . $component . '".';
 						}
 					}
 					unset($parameters[$s]);

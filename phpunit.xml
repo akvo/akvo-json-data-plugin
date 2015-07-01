@@ -9,10 +9,8 @@
       <file>tests/TestVersionArrayPageUpdateCheck.php</file>
       <file>tests/TestSimpleObjectQueryLanguage.php</file>
       <file>tests/TestDatabaseFeedStore.php</file>
-<!--
       <file>tests/TestTransientFeedCache.php</file>
       <file>tests/TestCurlFeedCache.php</file>
--->
     </testsuite>
   </testsuites>
 </phpunit>

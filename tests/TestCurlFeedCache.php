@@ -26,7 +26,7 @@ class TestCurlFeedCache extends \PHPUnit_Framework_TestCase
 
 		$item = $cache->getCurrentItem( '', self::testUrlXml, 0 );
 
-		$this->assertTrue( isset($item->query) );
+		$this->assertTrue( isset($item['query']) );
 	}
 
 	/**

@@ -24,11 +24,19 @@
                                                 }
                                                 if (name == 'page-url') {
                                                         if (!_.contains([ 'null', 'next' ], component)) {
-                                                                msgs.push('Invalid page-url for pagination policy: ' + component + ' suppored are "null" and "next"');
+                                                                msgs.push('Invalid page-url for pagination policy: ' + component + ' supported are "null" and "next"');
                                                         }
                                                 } else if (name == 'page-update-check') {
                                                         if (!_.contains([ 'null', 'version-array' ], component)) {
-                                                                msgs.push('Invalid page-update-check for pagination policy: ' + component + ' suppored are "null" and "version-array"');
+                                                                msgs.push('Invalid page-update-check for pagination policy: ' + component + ' supported are "null" and "version-array"');
+                                                        }
+                                                } else if (name == 'limit') {
+                                                        var n = parseInt( component );
+                                                        if ( isNaN(n) ) {
+                                                                msg.push('Invalid limit: ' + component);
+                                                        }
+                                                        if ( n <= 0 ) {
+                                                                msg.push('Invalid limit: ' + n + ', limit must be positive.' );
                                                         }
                                                 } else {
                                                         msgs.push('Invalid pagination policy component: ' + name);

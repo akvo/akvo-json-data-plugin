@@ -43,16 +43,22 @@ class MergingFeedCache extends AbstractFeedCache
 	private $pageUrl;
 
 	/**
+	 * var int limit The maximum number of pages to include.
+	 */
+	private $limit;
+
+	/**
 	 * var PageUpdateCheck page update checker.
 	 */
 	private $pageUpdateCheck;
 
-	public function __construct( FeedCache $nextLevel, Cache $cache, ObjectMerge $merger, PageUrl $pageUrl = null, PageUpdateCheck $pageUpdateCheck = null )
+	public function __construct( FeedCache $nextLevel, Cache $cache, ObjectMerge $merger, PageUrl $pageUrl = null, PageUpdateCheck $pageUpdateCheck = null, $limit = null )
 	{
 		parent::__construct( $nextLevel, $cache );
 		$this->merger = $merger;
 		$this->pageUrl = $pageUrl;
 		$this->pageUpdateCheck = $pageUpdateCheck;
+		$this->limit = $limit;
 	}
 
 	protected function fetch( $feedName, $url, $interval, $ttl, &$meta )
@@ -84,6 +90,10 @@ class MergingFeedCache extends AbstractFeedCache
 		$pageNumber = 1;
 		do {
 			$item = $this->merger->merge( $item, $page );
+
+			if ( \is_int($this->limit) && $pageNumber >= $this->limit ) {
+				break;
+			}
 
 			$update = $nextUpdate === $pageNumber;
 			if ($update) {
@@ -173,6 +183,11 @@ class MergingFeedCache extends AbstractFeedCache
 	public function setPageUpdateCheck( $pageUpdateCheck )
 	{
 		$this->pageUpdateCheck = $pageUpdateCheck;
+	}
+
+	public function setLimit( $limit )
+	{
+		$this->limit = $limit;
 	}
 
 }

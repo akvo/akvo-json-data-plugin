@@ -94,4 +94,54 @@ class TestMergingFeedCache extends \PHPUnit_Framework_TestCase
 		$this->assertEquals( $item, $mergedItem );
 
 	}
+
+	public function testLimit()
+	{
+		$page1 = $this->getMockBuilder('item')->getMock();
+		$page2 = $this->getMockBuilder('item')->getMock();
+		$page1->value = array( 'value' => array( 'page1' ));
+		$page2->value = array( 'value' => array( 'page2' ));
+
+		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem', 'flush') )->getMock();
+		$merger = $this->getMockBuilder('DataFeed\ObjectMerge\ObjectMerge')->setMethods( array( 'merge' ) )->getMock();
+		$pageUrl = $this->getMockBuilder('DataFeed\Pagination\PageUrl')->setMethods( array( 'pageUrl' ) )->getMock();
+		$pageUpdateCheck = $this->getMockBuilder('DataFeed\Pagination\PageUpdateCheck')->setMethods( array( 'checkUpdates' ) )->getMock();
+
+		$fc = new MergingFeedCache( $next, $this->setupInnerCache(), $merger, $pageUrl, $pageUpdateCheck, 1 );
+
+		$next->expects( $this->exactly( 1 ) )
+			->method('getCurrentItem')
+			->with($this->equalTo( 'foo:0' ))
+			->will( $this->returnValue( $page1 ) );
+
+		$merger->expects( $this->exactly( 1 ) )
+			->method('merge')
+			->with( $this->equalTo( array() ), $this->equalTo( $page1 ))
+			->will( $this->returnValue( $page1 ) );
+
+		$pageUrl->expects( $this->exactly( 1 ) )
+			->method('pageUrl')
+			->will( $this->returnCallback( function ( &$meta, $url, $item, $page ) {
+						switch ($page) {
+							case 0:
+								$meta[PageUrl::PAGE_URL_ARRAY] = array( 'http://page1' );
+								return true;
+							case 1:
+								$meta[PageUrl::PAGE_URL_ARRAY][] = 'http://page2';
+								return true;
+							case 2:
+								return false;
+						}
+					}) );
+
+
+		$pageUpdateCheck->expects( $this->once() )
+			->method('checkUpdates')
+			->will( $this->returnValue( array() ));
+
+		$item = $fc->getCurrentItem('foo', 'http://url', 5);
+
+		$this->assertEquals( $item, $page1 );
+	}
+
 }

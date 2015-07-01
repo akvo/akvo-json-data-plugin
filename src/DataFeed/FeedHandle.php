@@ -464,11 +464,14 @@ class FeedHandle
 		}
 		$pageUpdateCheckComponent = $this->page_update_check_factory->create( $page_update_check );
 
-
 		$this->feed_item_cache = DataFeed::component( DataFeed::MERGING_FEED_CACHE );
 
 		$this->feed_item_cache->setPageUpdateCheck( $pageUpdateCheckComponent );
 		$this->feed_item_cache->setPageUrl( $pageUrlComponent );
+
+		if (isset($parameters['limit']) && \is_numeric($parameters['limit']) ) {
+			$this->feed_item_cache->setLimit((int) $parameters['limit']);
+		}
 		
 	}
 }
