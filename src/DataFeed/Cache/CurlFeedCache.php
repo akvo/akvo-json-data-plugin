@@ -63,7 +63,7 @@ class CurlFeedCache implements FeedCache
 					if ( $result === false ) {
 						throw new FeedCacheException( "Could not parse xml in feed '$feedName'." );
 					}
-					return \json_decode( \json_encode( $result ) );
+					return \json_decode( \json_encode( $result ), true );
 
 				default:
 					throw new FeedCacheException( "Unsupported content type in feed '$feedName': '$contentType'" );
