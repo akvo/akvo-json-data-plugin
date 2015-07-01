@@ -70,12 +70,12 @@ The merging feed cache uses the following components:
 
 The pagination policy is specified using the following syntax:
 
-    page-url=<page url component>[:<parameter>]&page-update-check=<page update check component>[:<parameter>]
+    page-url=<page url component>[:<parameter>]&page-update-check=<page update check component>[:<parameter>][&limit=<postive integer>]
 
 For example it can be passed as a parameter to the short code:
 
     [data_feed name="my-example-data-feed" url="http://example.com/json-feed" interval="360"
-               pagination_policy="page-url=next:next-page-url&page-update-check=null"]
+               pagination_policy="page-url=next:next-page-url&page-update-check=null&limit=20"]
 
 In this example the page url resolver is set to 'next' with the field
 name 'next-page-url' and the page update checker is set to 'null'
@@ -90,6 +90,9 @@ thrown if the page URL's form a loop.
 The 'null' page update checker always indicates that all pages have
 been updated, which effectively forces a refetch of all pages every
 time the main item is refetched.
+
+The limit parameter sets a limit on the number of pages that will be
+fetched and merged.
 
 The pagination policy can be overridden in the administration
 interface.

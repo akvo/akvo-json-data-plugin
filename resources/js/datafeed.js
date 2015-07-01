@@ -33,10 +33,10 @@
                                                 } else if (name == 'limit') {
                                                         var n = parseInt( component );
                                                         if ( isNaN(n) ) {
-                                                                msg.push('Invalid limit: ' + component);
+                                                                msgs.push('Invalid limit: ' + component);
                                                         }
                                                         if ( n <= 0 ) {
-                                                                msg.push('Invalid limit: ' + n + ', limit must be positive.' );
+                                                                msgs.push('Invalid limit: ' + n + ', limit must be positive.' );
                                                         }
                                                 } else {
                                                         msgs.push('Invalid pagination policy component: ' + name);

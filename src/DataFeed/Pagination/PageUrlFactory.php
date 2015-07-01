@@ -17,7 +17,7 @@ class PageUrlFactory
 	public function create( $arg )
 	{
 		if ( empty( $arg ) ) {
-			return new NextPageUrl( $objectQuerlyLanguage );
+			return new NextPageUrl( $this->objectQuerlyLanguage );
 		}
 
 		$parts = explode( ':', $arg, 2 );
@@ -34,7 +34,7 @@ class PageUrlFactory
 			case 'null':
 				return new NullPageUrl();
 			case 'next':
-				return new NextPageUrl( $objectQueryLanguage, $parameter );
+				return new NextPageUrl( $this->objectQueryLanguage, $parameter );
 		}
 
 		throw new UnknownPageUrlComponentNameException( $name );
