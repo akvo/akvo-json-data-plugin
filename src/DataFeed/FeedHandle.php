@@ -132,14 +132,14 @@ class FeedHandle
 		PageUrlFactory $page_url_factory,
 		PageUpdateCheckFactory $page_update_check_factory,
 		$name,
-		$url = NULL,
-		$interval = 86400,
+		$url = null,
+		$interval = null,
 		$pagination_policy = null
 	)
 	{
 		$this->name = $name;
 		$this->url = $url;
-		$this->interval = $interval !== null ? $interval : 86400;
+		$this->interval = $interval;
 		$this->feed_store = $feed_store;
 		$this->feed_item_cache = $feed_item_cache;
 		$this->page_url_factory = $page_url_factory;

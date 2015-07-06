@@ -26,6 +26,11 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 			$this->getMockBuilder('DataFeed\Pagination\PageUpdateCheckFactory')->getMock(),
 			$name, $url);
 
+
+		$this->assertEquals($feed->getInterval(), null);
+
+		$feed->setInterval( 24 * 60 * 60 );
+
 		$this->assertEquals($feed->getName(), $name);
 		$this->assertEquals($feed->getURL(), $url);
 		$this->assertEquals($feed->getOURL(), null);
@@ -35,6 +40,7 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($feed->getEffectiveInterval(), 24 * 60 * 60);
 		$this->assertEquals($feed->getKey(), null);
 		$this->assertEquals($feed->getKeyParameter(), null);
+
 
 		$oURL = 'https://example.com/feed2';
 		$oInterval = 1;

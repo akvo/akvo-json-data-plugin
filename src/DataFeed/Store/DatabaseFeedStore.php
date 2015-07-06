@@ -123,6 +123,7 @@ class DatabaseFeedStore implements FeedStore
 		$add( 'df_pagination_policy', $feed->getPaginationPolicy(), '%s' );
 		$add( 'df_o_pagination_policy', $feed->getOPaginationPolicy(), '%s' );
 
+
 		if ( is_array($result) && count($result) === 0 ) {
 			$created = new \DateTime( 'now' );
 			$feed->setCreated( $created );

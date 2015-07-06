@@ -263,12 +263,9 @@ class DataFeed
 			$parameters = array();
 			parse_str( $a['pagination_policy'], $parameters );
 
-			\error_log('pagination_policy:' . $a['pagination_policy'] . "\n" . 'parameters: ' . print_r( $parameters, true ) );
-
 			foreach ( array( 'page-url', 'page-update-check', 'limit' ) as $s ) {
 				if (isset($parameters[$s])) {
 					$component = $parameters[$s];
-					\error_log( 'component: ' . $component );
 					$parts = \explode( ':', $component, 2 );
 					if (count($parts) == 2) {
 						$component = $parts[0];
@@ -276,7 +273,6 @@ class DataFeed
 					} else {
 						$param = null;
 					}
-					\error_log( 'component: ' . $component );
 					if ( $s == 'page-url' ) {
 						if (! in_array( $component, array( 'null', 'next' ) ) ) {
 							return 'Invalid page-url component: "' . $component . '" supported are "null" and "next".';
