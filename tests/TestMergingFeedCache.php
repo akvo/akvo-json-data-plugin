@@ -98,9 +98,7 @@ class TestMergingFeedCache extends \PHPUnit_Framework_TestCase
 	public function testLimit()
 	{
 		$page1 = $this->getMockBuilder('item')->getMock();
-		$page2 = $this->getMockBuilder('item')->getMock();
 		$page1->value = array( 'value' => array( 'page1' ));
-		$page2->value = array( 'value' => array( 'page2' ));
 
 		$next = $this->getMockBuilder('DataFeed\Cache\FeedCache')->setMethods( array('getCurrentItem', 'flush') )->getMock();
 		$merger = $this->getMockBuilder('DataFeed\ObjectMerge\ObjectMerge')->setMethods( array( 'merge' ) )->getMock();
@@ -126,9 +124,6 @@ class TestMergingFeedCache extends \PHPUnit_Framework_TestCase
 							case 0:
 								$meta[PageUrl::PAGE_URL_ARRAY] = array( 'http://page1' );
 								return true;
-							case 1:
-								$meta[PageUrl::PAGE_URL_ARRAY][] = 'http://page2';
-								return true;
 							case 2:
 								return false;
 						}
@@ -138,6 +133,10 @@ class TestMergingFeedCache extends \PHPUnit_Framework_TestCase
 		$pageUpdateCheck->expects( $this->once() )
 			->method('checkUpdates')
 			->will( $this->returnValue( array() ));
+
+		$item = $fc->getCurrentItem('foo', 'http://url', 5);
+
+		$this->assertEquals( $item, $page1 );
 
 		$item = $fc->getCurrentItem('foo', 'http://url', 5);
 

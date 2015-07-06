@@ -105,7 +105,7 @@ class DataFeed
 					return new \DataFeed\Ajax\DefaultRequestDataFetcher();
 				},
 				DataFeed::OBJECT_CACHE => function( $c ) {
-					return new \DataFeed\Cache\ObjectCache();
+					return new \DataFeed\Cache\TransientCache();
 				},
 				DataFeed::TRANSIENT_CACHE => function( $c ) {
 					return new \DataFeed\Cache\TransientCache();
@@ -288,7 +288,7 @@ class DataFeed
 						}
 					}
 					if ( $s == 'limit' ) {
-						if ( !\is_int($component) ) {
+						if ( !\is_numeric($component) ) {
 							return 'Invalid limit, must be an integer: "' . $component . '".';
 						}
 					}
