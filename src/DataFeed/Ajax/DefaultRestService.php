@@ -130,8 +130,6 @@ class DefaultRestService implements RestService
 		} catch (NonexistingFeedException $e) {
 			$this->error(404, 'The feed handle ' . $item  . ' does not exist!');
 		}
-
-
 	}
 
 	private function delete( $item )

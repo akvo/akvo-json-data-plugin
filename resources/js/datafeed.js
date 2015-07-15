@@ -189,7 +189,13 @@
                                         view.$el.find('.datafeed-info-note-item').html('Invalid: ' + error);
                                 });
                                 this.model.on('error', function(model, resp) {
-                                        view.$el.find('.datafeed-info-note-item').html('Server error: ' + resp.statusText);
+                                        var text;
+                                        if ( typeof(resp.response) === 'object' && typeof(resp.response.message) === 'string' ) {
+                                                text = resp.response.message;
+                                        } else {
+                                                text = resp.statusText;
+                                        }
+                                        view.$el.find('.datafeed-info-note-item').html('Server error ' + resp.statusCode + ': ' + text);
                                 });
                         }
                 });

@@ -88,5 +88,4 @@ class TestFeedHandle extends \PHPUnit_Framework_TestCase
 				'o_pagination_policy' => null
 			));
 	}
-
 }
