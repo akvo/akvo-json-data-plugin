@@ -106,40 +106,24 @@
                 });
 
                 var DataFeedView = Backbone.View.extend({
-                        template: _.template('<div class="datafeed-info-item"><%- name %></div>' +
-                                             '<div class="datafeed-info-item"><%- url %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_url %></div>' +
-                                             '<div class="datafeed-info-item"><%- interval %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_interval %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- key %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- key_parameter %></div>' +
-                                             '<div class="datafeed-info-item"><%- pagination_policy %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-editable-item"><%- o_pagination_policy %></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-remove-item"><a href="#">Remove</a></div>' +
-                                             '<div class="datafeed-info-item datafeed-info-note-item"></div>'),
+                        template: _.template('<dl><lh class="datafeed-info-item">Data feed - <%- name %><span class="datafeed-info-item datafeed-info-remove-item"><a href="#">Remove</a></span></lh>' +
+                                             '<dt>Note</dt><dd class="datafeed-info-item datafeed-info-note-item">&nbsp;</dd></dl>' +
+                                             '<dt>URL</dt><dd class="datafeed-info-item"><%- url %></dd>' +
+                                             '<dt>URL override</dt><dd class="datafeed-info-item datafeed-info-editable-item"><%- o_url %></dd>' +
+                                             '<dt>Interval</dt><dd class="datafeed-info-item"><%- interval %></dd>' +
+                                             '<dt>Interval override</dt><dd class="datafeed-info-item datafeed-info-editable-item"><%- o_interval %></dd>' +
+                                             '<dt>API key</dt><dd class="datafeed-info-item datafeed-info-editable-item"><%- key %></dd>' +
+                                             '<dt>API key parameter name</dt><dd class="datafeed-info-item datafeed-info-editable-item"><%- key_parameter %></dd>' +
+                                             '<dt>Pagination policy</dt><dd class="datafeed-info-item"><%- pagination_policy %></dd>' +
+                                             '<dt>Pagination policy override</dt><dd class="datafeed-info-item datafeed-info-editable-item"><%- o_pagination_policy %></dd>'
+                                             ),
                         render: function() {
                                 var data = _.clone(this.model.attributes);
-                                if (typeof(data.o_url) == 'undefined') {
-                                        data.o_url = '';
-                                }
-                                if (typeof(data.interval) == 'undefined') {
-                                        data.interval = null;
-                                }
-                                if (typeof(data.o_interval) == 'undefined') {
-                                        data.o_interval = null;
-                                }
-                                if (typeof(data.key) == 'undefined') {
-                                        data.key = null;
-                                }
-                                if (typeof(data.key_parameter) == 'undefined') {
-                                        data.key_parameter = null;
-                                }
-                                if (typeof(data.pagination_policy) == 'undefined') {
-                                        data.pagination_policy = null;
-                                }
-                                if (typeof(data.o_pagination_policy) == 'undefined') {
-                                        data.o_pagination_policy = null;
-                                }
+                                _.each( [ 'o_url', 'interval', 'o_interval', 'key', 'key_parameter', 'pagination_policy', 'o_pagination_policy' ], function (field) {
+                                        if (typeof(data[field]) === 'undefined' || data[field] == null || (typeof(data[field]) === 'string' && data[field] == '') ) {
+                                                data[field] = '-';
+                                        }
+                                } );
                                 this.$el.html(this.template(data));
                                 this.$el.addClass('datafeed-info');
 

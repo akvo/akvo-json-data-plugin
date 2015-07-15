@@ -19,19 +19,6 @@ class OptionsPage
 		<div id="datafeed-admin-options-add"><a id="datafeed-admin-options-add-link" href="#"><?php _e('Add datafeed', 'data-feed'); ?></a></div>
 		<div class="datafeed-admin-options">
 		<div class="datafeed-admin-option-feeds" id="datafeed-admin-option-feeds">
-		<div class="datafeed-info-heading">
-		<div class="datafeed-info-item-heading"><?php _e('Feed name', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('URL', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('URL override', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Interval', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Interval override', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('API key', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('API key query parameter', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Pagination policy', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Pagination policy override', 'data-feed'); ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Remove override', 'data-feed') ?></div>
-		<div class="datafeed-info-item-heading"><?php _e('Note', 'data-feed') ?></div>
-		</div>
 		</div>
 		</div>
 		<?php
