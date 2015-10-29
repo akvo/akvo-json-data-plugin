@@ -129,6 +129,14 @@ The plugin API functions can be used to fetch feed items in skins and other temp
 	 */
 	public static function item( $name, $url = null, $interval = 86400, $pagination_policy = null )
 
+Widget
+------
+
+The plugin bundles a widget which can be used for presenting data feed
+items from which title, time, text, link url and thumbnail image url
+can be extracted from.  See the widget configuration under appearance
+in the Wordpress administration dashboard.
+
 Upgrade
 -------
 
