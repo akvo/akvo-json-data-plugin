@@ -70,7 +70,7 @@ class NextPageUrl implements PageUrl
 				if (isset( $meta[self::PAGE_URL_ARRAY] ) && isset( $meta[self::PAGE_URL_ARRAY][$page] ) ) {
 					return false;
 				} else {
-					throw new PageUrlFailureException('No previous page and no cached URL for page number ' + $page + ' of feed ' . $url . '!' );
+					throw new PageUrlFailureException('No previous page and no cached URL for page number ' . $page . ' of feed ' . $url . '!' );
 				}
 			}
 			$nextUrl = $this->next( $prevPage, $url );

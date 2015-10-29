@@ -48,4 +48,9 @@ class PluginManagement
 		\load_plugin_textdomain( 'data-feed', false, DATA_FEED_PLUGIN_DIR . '/i18n' );
 		\add_action( 'wp_ajax_datafeed_service', 'DataFeed\Plugin\PluginManagement::datafeed_service' );
 	}
+
+	public static function widgets_init() {
+		\register_widget( 'DataFeed\Widget\DataFeedWidget' );
+		\register_widget( 'DataFeed\Widget\RsrUpdateWidget' );
+	}
 }

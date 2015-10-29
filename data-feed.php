@@ -19,7 +19,7 @@ register_uninstall_hook( __FILE__, 'DataFeed\Plugin\PluginManagement::uninstall'
 define( 'DATA_FEED_PLUGIN_DIR', __DIR__ );
 define( 'DATA_FEED_PLUGIN_VERSION', '1.3' );
 
-foreach ( array( 'admin_menu', 'plugins_loaded', 'admin_enqueue_scripts' ) as $a ) {
+foreach ( array( 'admin_menu', 'plugins_loaded', 'admin_enqueue_scripts', 'widgets_init' ) as $a ) {
 	add_action( $a, array( 'DataFeed\Plugin\PluginManagement', $a ) );
 }
 
