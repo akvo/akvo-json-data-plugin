@@ -296,7 +296,7 @@ class DataFeedWidget extends \WP_Widget {
 			echo '<h4>' . \esc_html__('Data feed field mappings', 'data_feed') . '</h4>';
 			echo '<p>A field in an hierarchical item can be referenced by creating a path of field name fragments separated by the delimiter ->.  Object properties and array indicies are referenced by using the same syntax.  Example <b>object->array->1->text</b>.</p>';
 			echo '<p>Also the special variable name "$index" can be used in the data field expression, which will be substituted by an index which is incremented for each widget of this type rendered.</p>';
-			echo '<p>Exampe: <b>objects->$index->time</b></p>
+			echo '<p>Exampe: <b>objects->$index->time</b></p>';
 			$this->text_field( self::TITLE_FIELD, \__('Title field:', 'data_feed'), $w);
 			$this->text_field( self::TEXT_FIELD, \__('Text field:', 'data_feed'), $w);
 			$this->text_field( self::TIME_FIELD, \__('Time field:', 'data_feed'), $w);
