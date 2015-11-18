@@ -115,56 +115,65 @@ class DataFeedWidget extends \WP_Widget {
 			$this->c(self::PAGINATION_POLICY, $instance) );
 		$url = \parse_url( $h->getEffectiveURL() );
 
-		$item = $h->getCurrentItem();
+		$exception = false;
 
+		try {
+			$item = $h->getCurrentItem();
+		} catch (\Exception $e) {
+			$exception = $e;
+		}
 
 		$columns = $this->c(self::COLUMNS, $instance);
 		if ($columns < 1 || $columns > 4) {
 			$columns = 1;
 		}
 		$amount = 3 * $columns;
-
 		$date = '';
-		$time_field = $this->c(self::TIME_FIELD, $instance);
-		if ( $time_field !== null ) {
-			$date_format = \get_option( 'date_format' );
-			$date = \date($date_format, \strtotime($this->query( $time_field, $item ) ));
-		}
-
-		$text = '';
-		$text_field = $this->c(self::TEXT_FIELD, $instance);
-		$excerpt_length = $this->c(self::EXCERPT_LENGTH, $instance);
-		if ( $text_field !== null ) {
-			if (empty($excerpt_length)) {
-				$excerpt_length =  \apply_filters( 'excerpt_length', 55 );
-			}
-			$excerpt_more = \apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
-			$text = \wp_trim_words( $this->query($text_field, $item), $excerpt_length, $excerpt_more );
-		}
-
-		$title = '';
-		$title_field = $this->c(self::TITLE_FIELD, $instance);
-		if ( $title_field !== null ) {
-			$title = htmlspecialchars($this->query( $title_field, $item ));
-		}
-
 		$thumb_url = null;
-		$thumb_field = $this->c(self::THUMB_FIELD, $instance);
-		if ( $thumb_field !== null ) {
-			$thumb = $this->query( $thumb_field, $item );
-			$thumb_url = self::extend_url( $thumb, $url );
-		}
-
 		$link_url = null;
-		$link_field = $this->c(self::LINK_FIELD, $instance);
-		if ( $link_field !== null ) {
-			$link = $this->query( $link_field, $item );
-			$link_url = self::extend_url( $link, $url );
-		}
-
 		$type = $this->c(self::TYPE, $instance);
 		$type_text = $this->c(self::TYPE_TEXT, $instance);
 
+		if ( $exception === false ) {
+			$time_field = $this->c(self::TIME_FIELD, $instance);
+			if ( $time_field !== null ) {
+				$date_format = \get_option( 'date_format' );
+				$date = \date($date_format, \strtotime($this->query( $time_field, $item ) ));
+			}
+
+			$text = '';
+			$text_field = $this->c(self::TEXT_FIELD, $instance);
+			$excerpt_length = $this->c(self::EXCERPT_LENGTH, $instance);
+			if ( $text_field !== null ) {
+				if (empty($excerpt_length)) {
+					$excerpt_length =  \apply_filters( 'excerpt_length', 55 );
+				}
+				$excerpt_more = \apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+				$text = \wp_trim_words( $this->query($text_field, $item), $excerpt_length, $excerpt_more );
+			}
+
+			$title = '';
+			$title_field = $this->c(self::TITLE_FIELD, $instance);
+			if ( $title_field !== null ) {
+				$title = htmlspecialchars($this->query( $title_field, $item ));
+			}
+
+			$thumb_field = $this->c(self::THUMB_FIELD, $instance);
+			if ( $thumb_field !== null ) {
+				$thumb = $this->query( $thumb_field, $item );
+				$thumb_url = self::extend_url( $thumb, $url );
+			}
+
+			$link_field = $this->c(self::LINK_FIELD, $instance);
+			if ( $link_field !== null ) {
+				$link = $this->query( $link_field, $item );
+				$link_url = self::extend_url( $link, $url );
+			}
+
+		} else {
+			$title = \__("Error", 'data_feed');
+			$text = \esc_html(sprintf(\__("Caugh exception when fetching data feed: %s", 'data_feed'), $exception));
+		}
 		$this->increment_index();
 
 		?>
@@ -178,10 +187,12 @@ class DataFeedWidget extends \WP_Widget {
         <time class="<?php echo $type; ?> date" datetime="<?php echo $date; ?>"><?php echo $date; ?></time>
         <span class="type"><span><?php _e($type_text, 'sage'); ?></span></span>
       </div>
+      <?php if (!empty($thumb_url)) { ?>
       <div class="thumb-wrapper">
-         <?php if (!empty($thumb_url)) { ?> <img src="<?php echo $thumb_url; ?>"><?php } ?>
+         <img src="<?php echo $thumb_url; ?>">
       </div>
-      <div class="excerpt">
+      <?php } ?>
+      <div class="excerpt<?php if ($exception !== false) {?> exception" style="max-height: 20em; overflow: scroll;<?php } ?>">
         <?php echo $text; ?>
       </div>
     </div>

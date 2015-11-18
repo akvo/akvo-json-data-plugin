@@ -10,11 +10,13 @@ class PluginManagement
 	public static function activation()
 	{
 		DataFeed::component( DataFeed::FEED_STORE )->activate();
+		\flush_rewrite_rules();
 	}
 
 	public static function deactivation()
 	{
 		DataFeed::component( DataFeed::FEED_STORE )->deactivate();
+		\flush_rewrite_rules();
 	}
 
 	public static function uninstall()
